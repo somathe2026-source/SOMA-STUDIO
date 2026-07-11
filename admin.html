@@ -2,122 +2,196 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>SOMA STUDIO | 老師管理後台</title>
   <style>
-    /* === 莫蘭迪棕色系視覺設定 === */
     :root {
       --bg-color: #F4F0EA;      
       --primary: #A68A7E;       
       --secondary: #E6DED8;     
       --text-dark: #4A3F39;     
-      --accent: #C49A87;        
       --white: #FFFFFF;
-      --danger: #D98C8C;
+      --deduct-color: #A95A4E;  
+      --add-color: #6E8573;     
     }
     
     * { box-sizing: border-box; font-family: 'Helvetica Neue', Arial, 'PingFang TC', sans-serif; }
-    body { background-color: var(--bg-color); color: var(--text-dark); margin: 0; padding: 20px; line-height: 1.6; }
-    h1, h2, h3 { color: var(--text-dark); margin-top: 0; letter-spacing: 1px;}
+    body { background-color: var(--bg-color); color: var(--text-dark); margin: 0; padding: 12px; font-size: 16px; }
     
-    .layout { display: flex; flex-wrap: wrap; gap: 20px; max-width: 1000px; margin: 0 auto; }
-    .panel { background: var(--white); border-radius: 12px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); flex: 1; min-width: 300px; }
+    h1, h2, h3, h4 { color: var(--text-dark); margin-top: 0; font-weight: normal; letter-spacing: 1px; }
+    h2 { font-size: 19px; border-left: 4px solid var(--primary); padding-left: 8px; margin-bottom: 16px; text-align: left; }
+
+    #auth-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: var(--bg-color); z-index: 10000;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px;
+    }
     
-    /* 搜尋與列表區 */
-    .search-bar { width: 100%; padding: 10px; border: 1px solid var(--secondary); border-radius: 8px; margin-bottom: 16px; font-size: 16px; outline: none;}
-    .search-bar:focus { border-color: var(--primary); }
+    .container { max-width: 500px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
+    .panel { background: var(--white); border-radius: 16px; padding: 18px; box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
     
-    .student-list { max-height: 500px; overflow-y: auto; border-top: 1px solid var(--secondary); padding-top: 10px; }
-    .student-item { display: flex; align-items: center; justify-content: space-between; padding: 10px; border-bottom: 1px dashed var(--secondary); transition: 0.2s; }
-    .student-item:hover { background-color: #faf9f7; }
-    .student-info { display: flex; align-items: center; gap: 10px; }
-    .student-info input[type="checkbox"] { transform: scale(1.3); accent-color: var(--primary); }
-    .points-badge { font-size: 12px; background: var(--secondary); padding: 4px 8px; border-radius: 12px; color: var(--text-dark); }
+    .search-bar { width: 100%; padding: 12px; border: 1px solid var(--secondary); border-radius: 10px; font-size: 16px; outline: none; background: var(--bg-color); color: var(--text-dark); }
+    .search-bar:focus { border-color: var(--primary); background: var(--white); }
     
-    /* 按鈕群 */
-    .action-btns button { padding: 4px 8px; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; color: var(--white); }
-    .btn-edit { background-color: var(--primary); }
-    .btn-delete { background-color: var(--danger); margin-left: 4px; }
+    .student-list { max-height: 280px; overflow-y: auto; margin-top: 8px; }
+    .student-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 6px; border-bottom: 1px solid #F2ECE4; }
+    .student-left { display: flex; align-items: center; gap: 12px; flex: 1; }
     
-    /* 表單區 */
-    .form-group { margin-bottom: 16px; }
-    .form-group label { display: block; font-size: 14px; margin-bottom: 6px; font-weight: bold; }
-    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid var(--secondary); border-radius: 8px; font-size: 14px; outline: none; }
-    .form-group textarea { resize: vertical; min-height: 80px; }
+    .student-checkbox { transform: scale(1.4); accent-color: var(--primary); margin-right: 4px; }
+    /* 獨立實體按鈕群組 */
+    .btn-group { display: flex; gap: 6px; flex-direction: column; }
+    .btn-detail { background-color: var(--primary); color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; }
+    .btn-delete { background-color: var(--deduct-color); color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; }
     
-    .btn-submit { width: 100%; background: var(--accent); color: var(--white); border: none; padding: 14px; border-radius: 8px; font-size: 16px; cursor: pointer; font-weight: bold; letter-spacing: 1px;}
-    .btn-submit:hover { background: var(--primary); }
+    .student-avatar { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 1px solid var(--secondary); background: #EEE; }
+    .student-meta { font-size: 15px; }
+    .student-subtext { font-size: 12px; color: #8A7F77; margin-top: 2px; }
+    .points-badge { font-size: 11px; color: #FFF; background: var(--primary); padding: 2px 6px; border-radius: 5px; display: inline-block; margin-top: 4px; }
     
-    #loading-msg { text-align: center; color: var(--primary); font-weight: bold; margin-bottom: 10px; }
+    .mode-switch-container { display: flex; background: var(--bg-color); border-radius: 10px; padding: 4px; margin-bottom: 16px; }
+    .mode-btn { flex: 1; text-align: center; padding: 10px; border-radius: 8px; font-size: 15px; cursor: pointer; font-weight: bold; transition: 0.3s; color: #888; }
+    .mode-btn.active-deduct { background: var(--deduct-color); color: var(--white); }
+    .mode-btn.active-add { background: var(--add-color); color: var(--white); }
+    
+    .form-row-flex { display: flex; gap: 12px; }
+    .form-col { flex: 1; transition: 0.3s; }
+    
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; font-size: 14px; margin-bottom: 6px; font-weight: 500; }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 11px; border: 1px solid var(--secondary); border-radius: 10px; font-size: 15px; outline: none; color: var(--text-dark); background: #FCFAFA; }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--primary); background: var(--white); }
+    
+    .warning-text { color: var(--deduct-color); font-size: 13px; margin-top: -8px; margin-bottom: 10px; font-weight: bold; display: none; }
+    
+    .btn-submit { width: 100%; color: var(--white); border: none; padding: 14px; border-radius: 10px; font-size: 16px; cursor: pointer; font-weight: bold; letter-spacing: 1px; transition: 0.3s; }
+    .btn-submit.bg-deduct { background-color: var(--deduct-color); }
+    .btn-submit.bg-add { background-color: var(--add-color); }
+    
+    #loading-msg { text-align: center; color: var(--primary); font-weight: bold; font-size: 14px; margin: 8px 0; }
     .hidden { display: none !important; }
+
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 10500; display: flex; align-items: flex-end; }
+    .modal-sheet { background: var(--white); width: 100%; max-height: 85%; border-top-left-radius: 20px; border-top-right-radius: 20px; padding: 20px; overflow-y: auto; box-shadow: 0 -4px 20px rgba(0,0,0,0.1); }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--secondary); padding-bottom: 10px; margin-bottom: 14px; }
+    .btn-close-modal { background: var(--secondary); border: none; padding: 6px 14px; border-radius: 8px; color: var(--text-dark); font-weight: bold; cursor: pointer; }
+    .log-timeline-item { background: var(--bg-color); padding: 10px; border-radius: 8px; margin-bottom: 8px; font-size: 13.5px; }
   </style>
 </head>
 <body>
 
-  <div class="layout">
+  <div id="auth-overlay" class="hidden">
+    <h3 style="margin-bottom: 6px;">SOMA STUDIO 後台安全驗證</h3>
+    <p style="font-size:14px; color:#888; margin-bottom:16px;">請輸入管理員預設密碼</p>
+    <input type="password" id="password-input" placeholder="請輸入密碼" style="padding: 12px; border: 1px solid var(--secondary); border-radius: 10px; text-align:center; font-size:18px; width:180px; margin-bottom:16px; outline:none;">
+    <button onclick="verifyPassword()" style="background: var(--primary); color: white; border:none; padding: 12px 26px; border-radius: 10px; font-size:16px; font-weight:bold;">確認登入</button>
+  </div>
+
+  <div class="container">
     <div class="panel">
       <h2>學員清單</h2>
-      <input type="text" id="search-input" class="search-bar" placeholder="🔍 輸入姓名或暱稱模糊搜尋..." onkeyup="filterStudents()">
-      <div id="loading-msg">載入資料中...</div>
-      <div class="student-list" id="student-list">
-        </div>
+      <input type="text" id="search-input" class="search-bar" placeholder="🔍 輸入姓名/暱稱模糊搜尋..." onkeyup="filterStudents()">
+      <div id="loading-msg">系統資料加載中...</div>
+      <div class="student-list" id="student-list"></div>
     </div>
 
     <div class="panel">
-      <h2>課程核銷 / 加點設定</h2>
-      <p style="font-size:13px; color:#888;">請先在左側勾選要處理的學員（可複選）</p>
+      <h2>課堂核銷與儲值設定</h2>
+      <div class="mode-switch-container">
+        <div id="mode-deduct" class="mode-btn active-deduct" onclick="switchMode('扣點')">扣點核銷</div>
+        <div id="mode-add" class="mode-btn" onclick="switchMode('加點')">儲值加點</div>
+      </div>
       
       <div class="form-group">
-        <label>上課日 / 異動日</label>
+        <label>上課 / 異動日期</label>
         <input type="date" id="class-date">
       </div>
       
       <div class="form-group">
-        <label>扣點設定 (課程類型)</label>
-        <select id="course-type">
-          <option value="器械">器械</option>
-          <option value="墊上">墊上</option>
+        <label>選擇點數類型</label>
+        <select id="point-type">
+          <option value="器械">器械點數</option>
+          <option value="墊上">墊上點數</option>
+          <option value="雙點">雙點數 (器械與墊上同時異動)</option>
         </select>
       </div>
       
+      <div class="form-row-flex">
+        <div class="form-group form-col">
+          <label id="points-label">扣除點數數量</label>
+          <input type="number" id="points-change" value="1" min="0" step="1">
+        </div>
+        <div id="expiry-group" class="form-group form-col hidden">
+          <label>點數到期日</label>
+          <input type="date" id="expiry-date" onchange="checkExpiryWarning()">
+        </div>
+      </div>
+      <div id="expiry-warning" class="warning-text">⚠️ 警告：設定的到期日低於 30 天，請確認是否正確！</div>
+      
       <div class="form-group">
-        <label>點數異動量</label>
-        <select id="points-change">
-          <option value="-1">扣除 1 點 (上課核銷)</option>
-          <option value="-2">扣除 2 點</option>
-          <option value="10">新增 10 點 (購買點數)</option>
-          <option value="20">新增 20 點 (購買點數)</option>
-          </select>
+        <label>此次異動主旨 <span style="color:var(--deduct-color)">*必填</span></label>
+        <input type="text" id="class-note" placeholder="例：下肢核心訓練、儲值20堂團課">
       </div>
       
       <div class="form-group">
-        <label>課程備註 (內部紀錄)</label>
-        <input type="text" id="class-note" placeholder="例：下肢核心訓練、新生體驗">
-      </div>
-      
-      <div class="form-group">
-        <label>給學生的話 (學生會在 LINE 看到)</label>
-        <textarea id="teacher-message" placeholder="例：今天核心發力做得很棒！回去記得拉筋喔～"></textarea>
+        <label>給學生的話 <span style="color:#888; font-weight:normal;">(選填附加，將同步發送 LINE 通知)</span></label>
+        <textarea id="teacher-message" placeholder="例：今天核心發力做得很好，回去記得多喝水拉筋喔～"></textarea>
       </div>
 
-      <button class="btn-submit" onclick="submitBatch()">送出執行</button>
+      <button id="submit-btn" class="btn-submit bg-deduct" onclick="executeSubmit()">確認送出核銷</button>
+    </div>
+  </div>
+
+  <div id="details-modal" class="modal-overlay hidden">
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <h3 id="modal-student-title" style="margin:0; font-weight:bold;">學員詳細明細</h3>
+        <button class="btn-close-modal" onclick="closeDetailsModal()">關閉</button>
+      </div>
+      <div id="modal-student-profile" style="font-size:14px; background:#FAF8F5; padding:12px; border-radius:10px; margin-bottom:14px; line-height:1.7;">
+      </div>
+      <h4 style="margin-bottom:8px; font-size:15px;">歷史異動明細紀錄 (24小時制)</h4>
+      <div id="modal-student-logs">
+      </div>
     </div>
   </div>
 
   <script>
     // ==========================================
-    // 請替換成你階段一取得的網頁應用程式 URL (保留引號)
-    // ==========================================
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwjVzYLsjAWSfIaB6lT68GZBF4w-Facr_QrPOCwk0cUVPDvqPvwaeiexi9p05kurnfD/exec";
     // ==========================================
 
     let allStudents = [];
+    let currentMode = "扣點"; 
 
-    // 1. 網頁載入時，撈取所有學員
-    window.onload = async function() {
-      document.getElementById('class-date').valueAsDate = new Date(); // 預設今天
-      fetchStudents();
+    // 計算年齡輔助函式
+    function calculateAge(birthdayStr) {
+      if (!birthdayStr) return "?";
+      const today = new Date();
+      const birthDate = new Date(birthdayStr);
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const m = today.getMonth() - birthDate.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) { age--; }
+      return age;
+    }
+
+    window.onload = function() {
+      document.getElementById('class-date').valueAsDate = new Date();
+      if (localStorage.getItem('soma_admin_authed') !== 'true') {
+        document.getElementById('auth-overlay').classList.remove('hidden');
+      } else {
+        fetchStudents();
+      }
     };
+
+    function verifyPassword() {
+      if (document.getElementById('password-input').value === "1018") {
+        localStorage.setItem('soma_admin_authed', 'true');
+        document.getElementById('auth-overlay').classList.add('hidden');
+        fetchStudents();
+      } else {
+        alert("密碼不正確喔！請重新輸入。");
+      }
+    }
 
     async function fetchStudents() {
       try {
@@ -127,37 +201,36 @@
           allStudents = result.data;
           renderStudents(allStudents);
           document.getElementById('loading-msg').classList.add('hidden');
-        } else {
-          alert("讀取失敗：" + result.message);
         }
-      } catch (err) {
-        alert("網路錯誤，請稍後再試。");
-      }
+      } catch (err) { alert("資料庫連線失敗，請確認網路與時區設定。"); }
     }
 
-    // 2. 渲染清單
     function renderStudents(list) {
       const container = document.getElementById('student-list');
       container.innerHTML = "";
-      
       if(list.length === 0) {
-        container.innerHTML = "<p style='text-align:center; color:#888;'>查無學員資料</p>";
+        container.innerHTML = "<p style='text-align:center; color:#888; padding:10px;'>無相符學員資料</p>";
         return;
       }
-
       list.forEach(student => {
+        const avatarUrl = student.avatar || "https://img.icons8.com/illustrations/xlarge/downloading-updates.png";
+        const displayDate = student.lastClassDate ? student.lastClassDate : "無紀錄";
+        const ageStr = calculateAge(student.birthday);
+        
         const item = document.createElement('div');
         item.className = 'student-item';
         item.innerHTML = `
-          <div class="student-info">
+          <div class="student-left">
             <input type="checkbox" value="${student.uid}" data-name="${student.name}" class="student-checkbox">
-            <div>
-              <strong>${student.name}</strong> <span style="color:#888; font-size:12px;">(${student.nickname})</span><br>
-              <span class="points-badge">器械: ${student.apparatusPoints} | 墊上: ${student.matPoints}</span>
+            <img src="${avatarUrl}" class="student-avatar">
+            <div class="student-meta">
+              <strong>${student.name}</strong> <span style="font-size:12px; color:#888;">(${student.nickname}, ${ageStr}歲)</span>
+              <div class="student-subtext">最近動態：${displayDate}</div>
+              <div class="points-badge">器械: ${student.apparatusPoints} | 墊上: ${student.matPoints}</div>
             </div>
           </div>
-          <div class="action-btns">
-            <button class="btn-edit" onclick="editNotice()">編輯</button>
+          <div class="btn-group">
+            <button class="btn-detail" onclick="openDetailsModal('${student.uid}')">📄 明細</button>
             <button class="btn-delete" onclick="deleteStudent('${student.uid}', '${student.name}')">刪除</button>
           </div>
         `;
@@ -165,101 +238,164 @@
       });
     }
 
-    // 3. 模糊搜尋功能
     function filterStudents() {
       const keyword = document.getElementById('search-input').value.toLowerCase();
       const filtered = allStudents.filter(s => 
-        s.name.toLowerCase().includes(keyword) || 
-        s.nickname.toLowerCase().includes(keyword)
+        s.name.toLowerCase().includes(keyword) || s.nickname.toLowerCase().includes(keyword)
       );
       renderStudents(filtered);
     }
 
-    // 4. 編輯與刪除功能
-    function editNotice() {
-      alert("【編輯說明】\n為確保資料庫完整性，若需修改姓名、生日等基本資料，請直接打開 Google 試算表的「學員資料」分頁進行修改，系統會即時同步。\n若需「修改點數」，請使用右側表單選擇「新增」即可。");
+    function switchMode(mode) {
+      currentMode = mode;
+      const btnDeduct = document.getElementById('mode-deduct'), btnAdd = document.getElementById('mode-add');
+      const submitBtn = document.getElementById('submit-btn'), expiryGroup = document.getElementById('expiry-group');
+      const pointsLabel = document.getElementById('points-label');
+
+      if (mode === "扣點") {
+        btnDeduct.className = "mode-btn active-deduct"; btnAdd.className = "mode-btn";
+        submitBtn.className = "btn-submit bg-deduct"; submitBtn.innerText = "確認送出核銷";
+        pointsLabel.innerText = "扣除點數數量"; expiryGroup.classList.add('hidden');
+      } else {
+        btnDeduct.className = "mode-btn"; btnAdd.className = "mode-btn active-add";
+        submitBtn.className = "btn-submit bg-add"; submitBtn.innerText = "確認送出加點儲值";
+        pointsLabel.innerText = "增加儲值點數"; expiryGroup.classList.remove('hidden');
+        const nextYear = new Date(); nextYear.setFullYear(nextYear.getFullYear() + 1);
+        document.getElementById('expiry-date').valueAsDate = nextYear;
+      }
+      checkExpiryWarning();
     }
 
-    async function deleteStudent(uid, name) {
-      if(!confirm(`確定要刪除學員 ${name} 嗎？此動作無法復原！`)) return;
-      
-      document.getElementById('loading-msg').innerText = "刪除中...";
-      document.getElementById('loading-msg').classList.remove('hidden');
-
-      try {
-        const res = await fetch(GAS_API_URL, {
-          method: 'POST',
-          body: JSON.stringify({ action: "deleteStudent", uid: uid })
-        });
-        const result = await res.json();
-        if(result.success) {
-          alert("已成功刪除學員！");
-          fetchStudents(); // 重新整理清單
-        } else {
-          alert("刪除失敗：" + result.message);
-        }
-      } catch (err) {
-        alert("網路錯誤，無法刪除。");
-      }
+    function checkExpiryWarning() {
+      if (currentMode === "扣點") return;
+      const expiryInput = document.getElementById('expiry-date').value;
+      const warningText = document.getElementById('expiry-warning');
+      if (!expiryInput) { warningText.style.display = "none"; return; }
+      const expiryDate = new Date(expiryInput + "T00:00:00");
+      const diffDays = Math.ceil((expiryDate - new Date().setHours(0,0,0,0)) / (1000 * 60 * 60 * 24));
+      warningText.style.display = diffDays < 30 ? "block" : "none";
     }
 
-    // 5. 批次送出核銷
-    async function submitBatch() {
-      const checkboxes = document.querySelectorAll('.student-checkbox:checked');
-      if(checkboxes.length === 0) {
-        alert("請先在左側清單勾選至少一位學員！");
-        return;
-      }
-
-      const selectedStudents = Array.from(checkboxes).map(cb => ({ uid: cb.value, name: cb.dataset.name }));
-      const courseType = document.getElementById('course-type').value;
-      const pointsChange = document.getElementById('points-change').value;
-      const classNote = document.getElementById('class-note').value;
-      const teacherMessage = document.getElementById('teacher-message').value;
-
-      let confirmMsg = `即將執行以下動作：\n類型：${courseType}\n異動點數：${pointsChange}\n\n影響學員：`;
-      selectedStudents.forEach(s => confirmMsg += `\n- ${s.name}`);
-      confirmMsg += `\n\n確定送出嗎？`;
-
-      if(!confirm(confirmMsg)) return;
-
-      document.getElementById('loading-msg').innerText = "系統處理中，請稍候...";
+    async function openDetailsModal(uid) {
+      document.getElementById('loading-msg').innerText = "🔍 正在即時加載歷史明細...";
       document.getElementById('loading-msg').classList.remove('hidden');
-
-      const postData = {
-        action: "processClassVerification",
-        students: selectedStudents,
-        courseType: courseType,
-        pointsChange: pointsChange,
-        note: classNote,
-        teacherMessage: teacherMessage
-      };
-
       try {
-        const res = await fetch(GAS_API_URL, {
-          method: 'POST',
-          body: JSON.stringify(postData)
-        });
+        const res = await fetch(`${GAS_API_URL}?action=getStudentData&uid=${uid}`);
         const result = await res.json();
-        
-        if(result.success) {
-          let alertMsg = "執行結果：\n";
-          result.results.forEach(r => {
-            alertMsg += `${r.name}: ${r.success ? "成功 (餘額 "+r.newBalance+")" : "失敗 ("+r.message+")"}\n`;
-          });
-          alert(alertMsg);
-          
-          // 清空表單並重新讀取資料
-          document.getElementById('class-note').value = "";
-          document.getElementById('teacher-message').value = "";
-          fetchStudents();
-        } else {
-          alert("系統錯誤：" + result.message);
-        }
-      } catch (err) {
-        alert("網路錯誤，處理失敗。");
         document.getElementById('loading-msg').classList.add('hidden');
+
+        if(result.success) {
+          const p = result.profile;
+          document.getElementById('modal-student-title').innerText = `${p.name} 的詳細資料`;
+          document.getElementById('modal-student-profile').innerHTML = `
+            <strong>LINE暱稱：</strong>${p.nickname} &nbsp;&nbsp; <strong>手機：</strong>${p.phone}<br>
+            <strong>生日：</strong>${p.birthday} (${calculateAge(p.birthday)}歲) &nbsp;&nbsp; <strong>點數到期日：</strong>${p.expiryDate || "尚未設定"}<br>
+            <span style="color:var(--deduct-color)"><strong>當前餘額：</strong>器械 ${p.apparatusPoints} 點 / 墊上 ${p.matPoints} 點</span>
+          `;
+
+          const logContainer = document.getElementById('modal-student-logs');
+          logContainer.innerHTML = "";
+          
+          if(result.logs.length === 0) {
+            logContainer.innerHTML = "<p style='text-align:center; color:#888; font-size:13px;'>目前無任何點數異動紀錄</p>";
+          } else {
+            // 將明細依日期群組化
+            const groupedLogs = {};
+            result.logs.forEach(log => {
+              const datePart = log.timestamp.split(' ')[0] || log.timestamp;
+              const timePart = log.timestamp.split(' ')[1] || '';
+              if (!groupedLogs[datePart]) groupedLogs[datePart] = [];
+              groupedLogs[datePart].push({ ...log, timePart });
+            });
+
+            for (const dateKey in groupedLogs) {
+              logContainer.innerHTML += `<div style="background:var(--secondary); color:var(--text-dark); padding:4px 10px; border-radius:6px; font-weight:bold; font-size:13px; margin:14px 0 8px 0;">📅 ${dateKey}</div>`;
+              groupedLogs[dateKey].forEach(log => {
+                let sign = log.pointsChange > 0 ? "+" : "";
+                let color = log.pointsChange > 0 ? "var(--add-color)" : "var(--deduct-color)";
+                let itemHtml = `
+                  <div class="log-timeline-item">
+                    <div style="display:flex; justify-content:space-between; font-size:11px; color:#888; margin-bottom:4px;">
+                      <span>⏳ 時間：${log.timePart || dateKey}</span>
+                      <span style="color:${color}; font-weight:bold; margin-left:auto;">${sign}${log.pointsChange} 點</span>
+                    </div>
+                    <strong>項目：</strong>${log.courseType}點數 (${log.note || "無主旨"})<br>
+                    ${log.teacherMessage ? `<span style="color:#665; font-style:italic;">💬 給學生的話：${log.teacherMessage}</span>` : ""}
+                  </div>`;
+                logContainer.innerHTML += itemHtml;
+              });
+            }
+          }
+          document.getElementById('details-modal').classList.remove('hidden');
+        }
+      } catch(e) { document.getElementById('loading-msg').classList.add('hidden'); }
+    }
+
+    function closeDetailsModal() { document.getElementById('details-modal').classList.add('hidden'); }
+
+    async function executeSubmit() {
+      const checkboxes = document.querySelectorAll('.student-checkbox:checked');
+      if (checkboxes.length === 0) { alert("❌ 請先勾選要處理的學員！"); return; }
+      const classNote = document.getElementById('class-note').value.trim();
+      if (!classNote) { alert("❌ 「此次異動主旨」是必填欄位喔！"); return; }
+      const selectedStudents = Array.from(checkboxes).map(cb => ({ uid: cb.value, name: cb.dataset.name }));
+      const pointType = document.getElementById('point-type').value;
+      let rawPoints = Number(document.getElementById('points-change').value);
+      if (isNaN(rawPoints) || rawPoints < 0) { alert("❌ 請輸入正確點數！"); return; }
+      const pointsChange = currentMode === "扣點" ? -1 * rawPoints : rawPoints;
+      const teacherMessage = document.getElementById('teacher-message').value;
+      const expiryDate = document.getElementById('expiry-date').value;
+
+      if (currentMode === "加點" && expiryDate) {
+        const diffDays = Math.ceil((new Date(expiryDate + "T00:00:00") - new Date().setHours(0,0,0,0)) / (1000 * 60 * 60 * 24));
+        if (diffDays < 30) {
+          if (!confirm(`⚠️ 【重要二次防呆提醒！！】\n設定效期僅剩 ${diffDays} 天。請問確定維持這個極短時間嗎？`)) return; 
+        }
       }
+
+      if (!confirm(`⚠️ 【SOMA 變更安全防呆確認】\n當前模式：${currentMode}\n點數項目：${pointType}\n異動點數：${pointsChange} 點\n主旨：${classNote}\n影響人數：共 ${selectedStudents.length} 位\n\n確定寫入並發送 LINE 推播？`)) return;
+
+      document.getElementById('loading-msg').innerText = "🚀 正在更新試算表並推播通知...";
+      document.getElementById('loading-msg').classList.remove('hidden');
+
+      try {
+        if (pointType === "雙點") {
+          const res1 = await sendVerificationRequest("器械", pointsChange, selectedStudents, classNote, teacherMessage, expiryDate);
+          const res2 = await sendVerificationRequest("墊上", pointsChange, selectedStudents, classNote, teacherMessage, expiryDate);
+          handleFinalResults([res1, res2]);
+        } else {
+          const res = await sendVerificationRequest(pointType, pointsChange, selectedStudents, classNote, teacherMessage, expiryDate);
+          handleFinalResults([res]);
+        }
+      } catch (err) { document.getElementById('loading-msg').classList.add('hidden'); }
+    }
+
+    async function sendVerificationRequest(type, change, students, note, msg, expiry) {
+      const postData = { action: "processClassVerification", students: students, courseType: type, pointsChange: change, note: note, teacherMessage: msg, expiryDate: currentMode === "加點" ? expiry : "" };
+      const response = await fetch(GAS_API_URL, { method: "POST", body: JSON.stringify(postData) });
+      return await response.json();
+    }
+
+    function handleFinalResults(resultsArray) {
+      document.getElementById('loading-msg').classList.add('hidden');
+      let summaryText = "🎉 【執行完畢報告】\n";
+      resultsArray.forEach(res => { if(res.results) res.results.forEach(r => summaryText += `${r.name}: ${r.success ? "成功更新" : "失敗"}\n`); });
+      alert(summaryText);
+      document.getElementById('class-note').value = ""; document.getElementById('teacher-message').value = ""; document.getElementById('points-change').value = "1";
+      fetchStudents();
+    }
+
+    // 密碼驗證刪除
+    async function deleteStudent(uid, name) {
+      const pwd = prompt("⚠️ 為防止誤刪，請輸入系統管理密碼：");
+      if (pwd !== "1018") { alert("密碼錯誤，取消刪除動作！"); return; }
+      
+      if(!confirm(`最後確認：確定要將學員【${name}】從系統徹底刪除嗎？`)) return;
+      try {
+        const res = await fetch(GAS_API_URL, { method: 'POST', body: JSON.stringify({ action: "deleteStudent", uid: uid }) });
+        const result = await res.json();
+        if(result.success) { alert("學員已移出系統。"); fetchStudents(); }
+      } catch (e) { alert("刪除失敗。"); }
     }
   </script>
 </body>
