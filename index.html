@@ -19,8 +19,74 @@
     body { background-color: var(--bg-color); color: var(--text-dark); margin: 0; padding: 20px; line-height: 1.6; }
     h1, h2, h3 { color: var(--text-dark); text-align: center; font-weight: normal; margin-bottom: 20px; letter-spacing: 2px;}
     
-    /* 載入中畫面 */
-    #loading-view { text-align: center; margin-top: 50px; font-size: 16px; color: var(--primary); }
+    /* 替換為這段新動態載入樣式 */
+#loading-view {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background-color: var(--bg-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+/* 載入器主容器 */
+.soma-loader-container {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  display: block;
+  margin: 0 auto;
+}
+
+/* 外圈旋轉的 SVG */
+.soma-loader-svg {
+  width: 100%;
+  height: 100%;
+  animation: somaRotateCircle 12s linear infinite; /* 控制旋轉速度，數字愈小轉愈快 */
+}
+
+.soma-loader-text {
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: 1.5px;
+  fill: var(--primary); /* 使用莫蘭迪粉棕色 */
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* 中間的讀取文字 */
+.soma-loader-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 15px;
+  color: var(--text-dark);
+  letter-spacing: 1px;
+  font-weight: normal;
+  white-space: nowrap;
+}
+
+/* 三個點點的跑馬燈動態 */
+.soma-dots::after {
+  content: '';
+  animation: somaBlinkDots 1.5s infinite steps(1);
+}
+
+/* 宣告動畫：文字圈旋轉 */
+@keyframes somaRotateCircle {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* 宣告動畫：點點跑馬燈 */
+@keyframes somaBlinkDots {
+  0% { content: ''; }
+  25% { content: '.'; }
+  50% { content: '..'; }
+  75% { content: '...'; }
+  100% { content: ''; }
+}
     
     /* 隱藏區塊用 */
     .hidden { display: none !important; }
@@ -60,7 +126,21 @@
 </head>
 <body>
 
-  <div id="loading-view">SOMA STUDIO 系統讀取中...</div>
+  <div id="loading-view">
+  <div class="soma-loader-container">
+    <div class="soma-loader-center">
+      讀取中<span class="soma-dots"></span>
+    </div>
+    <svg class="soma-loader-svg" viewBox="0 0 200 200">
+      <path id="somaTextPath" d="M 100, 100 m -62, 0 a 62,62 0 1,1 124,0 a 62,62 0 1,1 -124,0" fill="none" />
+      <text class="soma-loader-text">
+        <textPath href="#somaTextPath" startOffset="0%">
+          THE SOMA STUDIO • THE SOMA STUDIO • THE SOMA STUDIO • 
+        </textPath>
+      </text>
+    </svg>
+  </div>
+</div>
 
   <div id="register-view" class="container hidden">
     <h2>Welcome to SOMA</h2>
@@ -70,9 +150,19 @@
       <input type="text" id="reg-name" placeholder="請輸入姓名">
     </div>
     <div class="form-group">
-      <label>生日 (YYYY-MM-DD)</label>
-      <input type="date" id="reg-birthday">
+  <label>生日</label>
+  <div style="display: table; width: 100%; border-collapse: separate; border-spacing: 6px 0; margin-left: -6px;">
+    <div style="display: table-cell; width: 40%;">
+      <select id="reg-birth-year" style="width: 100%; padding: 12px; border: 1px solid var(--secondary); border-radius: 8px; font-size: 16px; background: var(--bg-color); color: var(--text-dark); outline: none;"></select>
     </div>
+    <div style="display: table-cell; width: 30%;">
+      <select id="reg-birth-month" style="width: 100%; padding: 12px; border: 1px solid var(--secondary); border-radius: 8px; font-size: 16px; background: var(--bg-color); color: var(--text-dark); outline: none;"></select>
+    </div>
+    <div style="display: table-cell; width: 30%;">
+      <select id="reg-birth-day" style="width: 100%; padding: 12px; border: 1px solid var(--secondary); border-radius: 8px; font-size: 16px; background: var(--bg-color); color: var(--text-dark); outline: none;"></select>
+    </div>
+  </div>
+</div>
     <div class="form-group">
       <label>手機號碼</label>
       <input type="tel" id="reg-phone" placeholder="09xxxxxxxx">
@@ -115,6 +205,7 @@
 
     // 1. 初始化 LIFF
     async function initSystem() {
+        initBirthdayDropdowns(); // <-- 請精準插入這一行
       try {
         await liff.init({ liffId: MY_LIFF_ID });
         if (!liff.isLoggedIn()) {
@@ -148,9 +239,15 @@
 
     // 3. 顯示註冊畫面並送出資料
     async function submitRegistration() {
-      const name = document.getElementById('reg-name').value;
-      const birthday = document.getElementById('reg-birthday').value;
-      const phone = document.getElementById('reg-phone').value;
+      // 替換為這段新程式碼
+        const name = document.getElementById('reg-name').value;
+        const phone = document.getElementById('reg-phone').value;
+
+        // 分開讀取並組合成 YYYY-MM-DD
+        const year = document.getElementById('reg-birth-year').value;
+        const month = document.getElementById('reg-birth-month').value;
+        const day = document.getElementById('reg-birth-day').value;
+        const birthday = `${year}-${month}-${day}`;
 
       if (!name || !birthday || !phone) {
         alert("請完整填寫所有資料唷！");
@@ -232,6 +329,40 @@
         logContainer.innerHTML += logHtml;
       });
     }
+
+    // 請整段貼入，作為獨立的新區塊
+function initBirthdayDropdowns() {
+  const yearSelect = document.getElementById('reg-birth-year');
+  const monthSelect = document.getElementById('reg-birth-month');
+  const daySelect = document.getElementById('reg-birth-day');
+
+  // 1. 產生年份 (1950 到 2026 年)，並預設開啟 1990
+  for (let y = 2026; y >= 1950; y--) {
+    let opt = document.createElement('option');
+    opt.value = y;
+    opt.text = y + " 年";
+    if (y === 1990) opt.selected = true; // 預設選取 1990
+    yearSelect.appendChild(opt);
+  }
+
+  // 2. 產生月份 (1 到 12 月)，自動補零符合格式
+  for (let m = 1; m <= 12; m++) {
+    let opt = document.createElement('option');
+    let mStr = String(m).padStart(2, '0');
+    opt.value = mStr;
+    opt.text = m + " 月";
+    monthSelect.appendChild(opt);
+  }
+
+  // 3. 產生日期 (1 到 31 日)，自動補零符合格式
+  for (let d = 1; d <= 31; d++) {
+    let opt = document.createElement('option');
+    let dStr = String(d).padStart(2, '0');
+    opt.value = dStr;
+    opt.text = d + " 日";
+    daySelect.appendChild(opt);
+  }
+}
 
     // 啟動程式
     initSystem();
