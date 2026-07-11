@@ -133,7 +133,7 @@
       <div id="expiry-warning" class="warning-text">⚠️ 警告：設定的到期日低於 30 天，請確認是否正確！</div>
       
       <div class="form-group">
-        <label>內部課堂備註 <span style="color:#888; font-weight:normal;">(僅供內部紀錄，非必填)</span></label>
+        <label>內部課堂備註 <span style="color:#888; font-weight:normal;">(會顯示給學員，非必填)</span></label>
         <input type="text" id="class-note" placeholder="例：下肢核心訓練、儲值20堂團課">
       </div>
       
@@ -434,13 +434,20 @@
     }
 
     async function handleFinalResults(resultsArray) {
-      let summaryText = "";
-      resultsArray.forEach(res => { if(res.results) res.results.forEach(r => summaryText += `${r.name}: ${r.success ? "✅ 成功" : "❌ 失敗"}\n`); });
-      await customAlert(summaryText, "🎉", "執行完畢報告");
-      
-      document.getElementById('class-note').value = ""; document.getElementById('teacher-message').value = ""; document.getElementById('points-change').value = "1";
-      fetchStudents();
+  let summaryText = "";
+  resultsArray.forEach(res => { 
+    if(res.results) {
+      res.results.forEach(r => {
+        // 這裡會把 GAS 捕捉到的 LINE 錯誤直接印出來
+        summaryText += `${r.name}: ${r.success ? "✅ " + r.message : "❌ 失敗 (" + r.message + ")"}\n\n`; 
+      });
     }
+  });
+  await customAlert(summaryText, "🎉", "執行完畢報告");
+  
+  document.getElementById('class-note').value = ""; document.getElementById('teacher-message').value = ""; document.getElementById('points-change').value = "1";
+  fetchStudents();
+}
 
     async function deleteStudent(uid, name) {
       const pwd = await customPrompt(`為防止誤刪，請輸入系統密碼以刪除【${name}】：`, "🔒 安全鎖定");
