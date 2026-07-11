@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>SOMA STUDIO | 會員專區</title>
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <style>
+    /* === 莫蘭迪棕色系視覺設定 === */
+    :root {
+      --bg-color: #F4F0EA;      /* 溫柔燕麥奶色 */
+      --primary: #A68A7E;       /* 莫蘭迪粉棕色 */
+      --secondary: #E6DED8;     /* 淺灰棕色 */
+      --text-dark: #4A3F39;     /* 深咖啡色 */
+      --accent: #C49A87;        /* 陶土棕 */
+    }
+    
+    * { box-sizing: border-box; font-family: 'Helvetica Neue', Arial, 'PingFang TC', '微軟正黑體', sans-serif; }
+    body { background-color: var(--bg-color); color: var(--text-dark); margin: 0; padding: 20px; line-height: 1.6; }
+    h1, h2, h3 { color: var(--text-dark); text-align: center; font-weight: normal; margin-bottom: 20px; letter-spacing: 2px;}
+    
+    /* 載入中畫面 */
+    #loading-view { text-align: center; margin-top: 50px; font-size: 16px; color: var(--primary); }
+    
+    /* 隱藏區塊用 */
+    .hidden { display: none !important; }
+    
+    /* 卡片與容器設計 */
+    .container { max-width: 400px; margin: 0 auto; background: #FFF; border-radius: 16px; padding: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+    
+    /* 表單設計 */
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 14px; margin-bottom: 6px; color: var(--text-dark); }
+    .form-group input { width: 100%; padding: 12px; border: 1px solid var(--secondary); border-radius: 8px; font-size: 16px; background: var(--bg-color); color: var(--text-dark); outline: none;}
+    .form-group input:focus { border-color: var(--primary); }
+    
+    /* 按鈕設計 */
+    .btn { width: 100%; background: var(--primary); color: #FFF; border: none; padding: 14px; border-radius: 8px; font-size: 16px; cursor: pointer; letter-spacing: 1px; transition: 0.3s; }
+    .btn:active { background: var(--text-dark); }
+    
+    /* 會員檔案區 */
+    .profile-header { display: flex; align-items: center; margin-bottom: 24px; }
+    .profile-pic { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid var(--secondary); margin-right: 16px; }
+    .profile-name { font-size: 20px; font-weight: bold; }
+    
+    /* 點數區塊 */
+    .points-box { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 24px; }
+    .point-card { flex: 1; background: var(--secondary); padding: 16px; border-radius: 12px; text-align: center; }
+    .point-card span { display: block; font-size: 14px; margin-bottom: 4px; }
+    .point-card strong { font-size: 28px; color: var(--accent); }
+    .expiry-date { text-align: center; font-size: 12px; color: #888; margin-top: -10px; margin-bottom: 24px; }
+    
+    /* 明細列表 */
+    .log-list { border-top: 1px solid var(--secondary); padding-top: 16px; }
+    .log-item { background: var(--bg-color); padding: 12px; border-radius: 8px; margin-bottom: 12px; font-size: 14px; }
+    .log-header { display: flex; justify-content: space-between; margin-bottom: 6px; color: #888; font-size: 12px; }
+    .log-title { font-weight: bold; color: var(--primary); }
+    .log-message { margin-top: 6px; padding-top: 6px; border-top: 1px dashed var(--secondary); font-style: italic; color: var(--text-dark); }
+  </style>
+</head>
+<body>
+
+  <div id="loading-view">SOMA STUDIO 系統讀取中...</div>
+
+  <div id="register-view" class="container hidden">
+    <h2>Welcome to SOMA</h2>
+    <p style="text-align:center; font-size:14px; color:#888;">初次見面！請填寫基本資料完成綁定</p>
+    <div class="form-group">
+      <label>真實姓名</label>
+      <input type="text" id="reg-name" placeholder="請輸入姓名">
+    </div>
+    <div class="form-group">
+      <label>生日 (YYYY-MM-DD)</label>
+      <input type="date" id="reg-birthday">
+    </div>
+    <div class="form-group">
+      <label>手機號碼</label>
+      <input type="tel" id="reg-phone" placeholder="09xxxxxxxx">
+    </div>
+    <button class="btn" onclick="submitRegistration()">完成註冊</button>
+  </div>
+
+  <div id="dashboard-view" class="container hidden">
+    <div class="profile-header">
+      <img id="user-pic" class="profile-pic" src="" alt="大頭照">
+      <div id="user-name" class="profile-name">載入中...</div>
+    </div>
+    
+    <div class="points-box">
+      <div class="point-card">
+        <span>器械點數</span>
+        <strong id="apparatus-pts">0</strong>
+      </div>
+      <div class="point-card">
+        <span>墊上點數</span>
+        <strong id="mat-pts">0</strong>
+      </div>
+    </div>
+    <div class="expiry-date" id="expiry-date">到期日：-</div>
+    
+    <h3>使用明細</h3>
+    <div id="log-container" class="log-list">
+      </div>
+  </div>
+
+  <script>
+    // ==========================================
+    // 請在這裡替換成你專屬的鑰匙！ (請保留引號)
+    // ==========================================
+    const MY_LIFF_ID = "2009363159"; 
+    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwjVzYLsjAWSfIaB6lT68GZBF4w-Facr_QrPOCwk0cUVPDvqPvwaeiexi9p05kurnfD/exec";
+    // ==========================================
+
+    let liffProfile = null;
+
+    // 1. 初始化 LIFF
+    async function initSystem() {
+      try {
+        await liff.init({ liffId: MY_LIFF_ID });
+        if (!liff.isLoggedIn()) {
+          liff.login();
+        } else {
+          liffProfile = await liff.getProfile();
+          checkStudentData(liffProfile.userId);
+        }
+      } catch (err) {
+        alert("LIFF 初始化失敗，請確認 LIFF ID 是否正確。\n錯誤訊息: " + err);
+      }
+    }
+
+    // 2. 透過 API 檢查學員資料
+    async function checkStudentData(uid) {
+      try {
+        const response = await fetch(`${GAS_API_URL}?action=getStudentData&uid=${uid}`);
+        const result = await response.json();
+        
+        document.getElementById('loading-view').classList.add('hidden');
+
+        if (result.isRegistered) {
+          showDashboard(result.profile, result.logs);
+        } else {
+          document.getElementById('register-view').classList.remove('hidden');
+        }
+      } catch (err) {
+        alert("連線資料庫失敗，請稍後再試。");
+      }
+    }
+
+    // 3. 顯示註冊畫面並送出資料
+    async function submitRegistration() {
+      const name = document.getElementById('reg-name').value;
+      const birthday = document.getElementById('reg-birthday').value;
+      const phone = document.getElementById('reg-phone').value;
+
+      if (!name || !birthday || !phone) {
+        alert("請完整填寫所有資料唷！");
+        return;
+      }
+
+      document.getElementById('register-view').classList.add('hidden');
+      document.getElementById('loading-view').classList.remove('hidden');
+
+      const postData = {
+        action: "registerStudent",
+        uid: liffProfile.userId,
+        nickname: liffProfile.displayName,
+        avatar: liffProfile.pictureUrl || "",
+        name: name,
+        birthday: birthday,
+        phone: phone
+      };
+
+      try {
+        const response = await fetch(GAS_API_URL, {
+          method: "POST",
+          body: JSON.stringify(postData)
+        });
+        const result = await response.json();
+        
+        if (result.success) {
+          alert("註冊成功！系統為您跳轉。");
+          // 重新讀取資料
+          checkStudentData(liffProfile.userId);
+        } else {
+          alert("註冊失敗：" + result.message);
+        }
+      } catch (err) {
+        alert("系統發生錯誤，請通知老師協助。");
+      }
+    }
+
+    // 4. 顯示學員儀表板與明細
+    function showDashboard(profile, logs) {
+      document.getElementById('dashboard-view').classList.remove('hidden');
+      
+      // 填入基本資料
+      document.getElementById('user-pic').src = profile.avatar || "https://via.placeholder.com/60";
+      document.getElementById('user-name').innerText = profile.name + " (" + profile.nickname + ")";
+      document.getElementById('apparatus-pts').innerText = profile.apparatusPoints;
+      document.getElementById('mat-pts').innerText = profile.matPoints;
+      document.getElementById('expiry-date').innerText = "點數到期日：" + (profile.expiryDate || "尚未設定");
+
+      // 填入歷史明細清單
+      const logContainer = document.getElementById('log-container');
+      logContainer.innerHTML = ""; // 清空
+
+      if (logs.length === 0) {
+        logContainer.innerHTML = "<p style='text-align:center; color:#888;'>目前還沒有點數異動紀錄喔！</p>";
+        return;
+      }
+
+      logs.forEach(log => {
+        let actionWord = log.pointsChange > 0 ? "儲值" : "扣除";
+        let sign = log.pointsChange > 0 ? "+" : "";
+        let color = log.pointsChange > 0 ? "green" : "red";
+        
+        let logHtml = `
+          <div class="log-item">
+            <div class="log-header">
+              <span>${log.timestamp}</span>
+              <span style="color:${color}">${sign}${log.pointsChange} 點</span>
+            </div>
+            <div class="log-title">${log.courseType} ${actionWord} (${log.note || "系統紀錄"})</div>
+        `;
+        
+        // 若有老師的話，則顯示出來
+        if (log.teacherMessage) {
+          logHtml += `<div class="log-message">給你的話：${log.teacherMessage}</div>`;
+        }
+        
+        logHtml += `</div>`;
+        logContainer.innerHTML += logHtml;
+      });
+    }
+
+    // 啟動程式
+    initSystem();
+  </script>
+</body>
+</html>
