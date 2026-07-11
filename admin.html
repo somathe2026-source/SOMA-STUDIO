@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SOMA STUDIO | 老師管理後台</title>
+  <style>
+    /* === 莫蘭迪棕色系視覺設定 === */
+    :root {
+      --bg-color: #F4F0EA;      
+      --primary: #A68A7E;       
+      --secondary: #E6DED8;     
+      --text-dark: #4A3F39;     
+      --accent: #C49A87;        
+      --white: #FFFFFF;
+      --danger: #D98C8C;
+    }
+    
+    * { box-sizing: border-box; font-family: 'Helvetica Neue', Arial, 'PingFang TC', sans-serif; }
+    body { background-color: var(--bg-color); color: var(--text-dark); margin: 0; padding: 20px; line-height: 1.6; }
+    h1, h2, h3 { color: var(--text-dark); margin-top: 0; letter-spacing: 1px;}
+    
+    .layout { display: flex; flex-wrap: wrap; gap: 20px; max-width: 1000px; margin: 0 auto; }
+    .panel { background: var(--white); border-radius: 12px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); flex: 1; min-width: 300px; }
+    
+    /* 搜尋與列表區 */
+    .search-bar { width: 100%; padding: 10px; border: 1px solid var(--secondary); border-radius: 8px; margin-bottom: 16px; font-size: 16px; outline: none;}
+    .search-bar:focus { border-color: var(--primary); }
+    
+    .student-list { max-height: 500px; overflow-y: auto; border-top: 1px solid var(--secondary); padding-top: 10px; }
+    .student-item { display: flex; align-items: center; justify-content: space-between; padding: 10px; border-bottom: 1px dashed var(--secondary); transition: 0.2s; }
+    .student-item:hover { background-color: #faf9f7; }
+    .student-info { display: flex; align-items: center; gap: 10px; }
+    .student-info input[type="checkbox"] { transform: scale(1.3); accent-color: var(--primary); }
+    .points-badge { font-size: 12px; background: var(--secondary); padding: 4px 8px; border-radius: 12px; color: var(--text-dark); }
+    
+    /* 按鈕群 */
+    .action-btns button { padding: 4px 8px; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; color: var(--white); }
+    .btn-edit { background-color: var(--primary); }
+    .btn-delete { background-color: var(--danger); margin-left: 4px; }
+    
+    /* 表單區 */
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 14px; margin-bottom: 6px; font-weight: bold; }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid var(--secondary); border-radius: 8px; font-size: 14px; outline: none; }
+    .form-group textarea { resize: vertical; min-height: 80px; }
+    
+    .btn-submit { width: 100%; background: var(--accent); color: var(--white); border: none; padding: 14px; border-radius: 8px; font-size: 16px; cursor: pointer; font-weight: bold; letter-spacing: 1px;}
+    .btn-submit:hover { background: var(--primary); }
+    
+    #loading-msg { text-align: center; color: var(--primary); font-weight: bold; margin-bottom: 10px; }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+  <div class="layout">
+    <div class="panel">
+      <h2>學員清單</h2>
+      <input type="text" id="search-input" class="search-bar" placeholder="🔍 輸入姓名或暱稱模糊搜尋..." onkeyup="filterStudents()">
+      <div id="loading-msg">載入資料中...</div>
+      <div class="student-list" id="student-list">
+        </div>
+    </div>
+
+    <div class="panel">
+      <h2>課程核銷 / 加點設定</h2>
+      <p style="font-size:13px; color:#888;">請先在左側勾選要處理的學員（可複選）</p>
+      
+      <div class="form-group">
+        <label>上課日 / 異動日</label>
+        <input type="date" id="class-date">
+      </div>
+      
+      <div class="form-group">
+        <label>扣點設定 (課程類型)</label>
+        <select id="course-type">
+          <option value="器械">器械</option>
+          <option value="墊上">墊上</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label>點數異動量</label>
+        <select id="points-change">
+          <option value="-1">扣除 1 點 (上課核銷)</option>
+          <option value="-2">扣除 2 點</option>
+          <option value="10">新增 10 點 (購買點數)</option>
+          <option value="20">新增 20 點 (購買點數)</option>
+          </select>
+      </div>
+      
+      <div class="form-group">
+        <label>課程備註 (內部紀錄)</label>
+        <input type="text" id="class-note" placeholder="例：下肢核心訓練、新生體驗">
+      </div>
+      
+      <div class="form-group">
+        <label>給學生的話 (學生會在 LINE 看到)</label>
+        <textarea id="teacher-message" placeholder="例：今天核心發力做得很棒！回去記得拉筋喔～"></textarea>
+      </div>
+
+      <button class="btn-submit" onclick="submitBatch()">送出執行</button>
+    </div>
+  </div>
+
+  <script>
+    // ==========================================
+    // 請替換成你階段一取得的網頁應用程式 URL (保留引號)
+    // ==========================================
+    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwjVzYLsjAWSfIaB6lT68GZBF4w-Facr_QrPOCwk0cUVPDvqPvwaeiexi9p05kurnfD/exec";
+    // ==========================================
+
+    let allStudents = [];
+
+    // 1. 網頁載入時，撈取所有學員
+    window.onload = async function() {
+      document.getElementById('class-date').valueAsDate = new Date(); // 預設今天
+      fetchStudents();
+    };
+
+    async function fetchStudents() {
+      try {
+        const res = await fetch(`${GAS_API_URL}?action=getAllStudents`);
+        const result = await res.json();
+        if(result.success) {
+          allStudents = result.data;
+          renderStudents(allStudents);
+          document.getElementById('loading-msg').classList.add('hidden');
+        } else {
+          alert("讀取失敗：" + result.message);
+        }
+      } catch (err) {
+        alert("網路錯誤，請稍後再試。");
+      }
+    }
+
+    // 2. 渲染清單
+    function renderStudents(list) {
+      const container = document.getElementById('student-list');
+      container.innerHTML = "";
+      
+      if(list.length === 0) {
+        container.innerHTML = "<p style='text-align:center; color:#888;'>查無學員資料</p>";
+        return;
+      }
+
+      list.forEach(student => {
+        const item = document.createElement('div');
+        item.className = 'student-item';
+        item.innerHTML = `
+          <div class="student-info">
+            <input type="checkbox" value="${student.uid}" data-name="${student.name}" class="student-checkbox">
+            <div>
+              <strong>${student.name}</strong> <span style="color:#888; font-size:12px;">(${student.nickname})</span><br>
+              <span class="points-badge">器械: ${student.apparatusPoints} | 墊上: ${student.matPoints}</span>
+            </div>
+          </div>
+          <div class="action-btns">
+            <button class="btn-edit" onclick="editNotice()">編輯</button>
+            <button class="btn-delete" onclick="deleteStudent('${student.uid}', '${student.name}')">刪除</button>
+          </div>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    // 3. 模糊搜尋功能
+    function filterStudents() {
+      const keyword = document.getElementById('search-input').value.toLowerCase();
+      const filtered = allStudents.filter(s => 
+        s.name.toLowerCase().includes(keyword) || 
+        s.nickname.toLowerCase().includes(keyword)
+      );
+      renderStudents(filtered);
+    }
+
+    // 4. 編輯與刪除功能
+    function editNotice() {
+      alert("【編輯說明】\n為確保資料庫完整性，若需修改姓名、生日等基本資料，請直接打開 Google 試算表的「學員資料」分頁進行修改，系統會即時同步。\n若需「修改點數」，請使用右側表單選擇「新增」即可。");
+    }
+
+    async function deleteStudent(uid, name) {
+      if(!confirm(`確定要刪除學員 ${name} 嗎？此動作無法復原！`)) return;
+      
+      document.getElementById('loading-msg').innerText = "刪除中...";
+      document.getElementById('loading-msg').classList.remove('hidden');
+
+      try {
+        const res = await fetch(GAS_API_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: "deleteStudent", uid: uid })
+        });
+        const result = await res.json();
+        if(result.success) {
+          alert("已成功刪除學員！");
+          fetchStudents(); // 重新整理清單
+        } else {
+          alert("刪除失敗：" + result.message);
+        }
+      } catch (err) {
+        alert("網路錯誤，無法刪除。");
+      }
+    }
+
+    // 5. 批次送出核銷
+    async function submitBatch() {
+      const checkboxes = document.querySelectorAll('.student-checkbox:checked');
+      if(checkboxes.length === 0) {
+        alert("請先在左側清單勾選至少一位學員！");
+        return;
+      }
+
+      const selectedStudents = Array.from(checkboxes).map(cb => ({ uid: cb.value, name: cb.dataset.name }));
+      const courseType = document.getElementById('course-type').value;
+      const pointsChange = document.getElementById('points-change').value;
+      const classNote = document.getElementById('class-note').value;
+      const teacherMessage = document.getElementById('teacher-message').value;
+
+      let confirmMsg = `即將執行以下動作：\n類型：${courseType}\n異動點數：${pointsChange}\n\n影響學員：`;
+      selectedStudents.forEach(s => confirmMsg += `\n- ${s.name}`);
+      confirmMsg += `\n\n確定送出嗎？`;
+
+      if(!confirm(confirmMsg)) return;
+
+      document.getElementById('loading-msg').innerText = "系統處理中，請稍候...";
+      document.getElementById('loading-msg').classList.remove('hidden');
+
+      const postData = {
+        action: "processClassVerification",
+        students: selectedStudents,
+        courseType: courseType,
+        pointsChange: pointsChange,
+        note: classNote,
+        teacherMessage: teacherMessage
+      };
+
+      try {
+        const res = await fetch(GAS_API_URL, {
+          method: 'POST',
+          body: JSON.stringify(postData)
+        });
+        const result = await res.json();
+        
+        if(result.success) {
+          let alertMsg = "執行結果：\n";
+          result.results.forEach(r => {
+            alertMsg += `${r.name}: ${r.success ? "成功 (餘額 "+r.newBalance+")" : "失敗 ("+r.message+")"}\n`;
+          });
+          alert(alertMsg);
+          
+          // 清空表單並重新讀取資料
+          document.getElementById('class-note').value = "";
+          document.getElementById('teacher-message').value = "";
+          fetchStudents();
+        } else {
+          alert("系統錯誤：" + result.message);
+        }
+      } catch (err) {
+        alert("網路錯誤，處理失敗。");
+        document.getElementById('loading-msg').classList.add('hidden');
+      }
+    }
+  </script>
+</body>
+</html>
