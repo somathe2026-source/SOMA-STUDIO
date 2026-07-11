@@ -8,170 +8,56 @@
   <style>
     /* === 莫蘭迪棕色系視覺設定 === */
     :root {
-      --bg-color: #F4F0EA;      /* 溫柔燕麥奶色 */
-      --primary: #A68A7E;       /* 莫蘭迪粉棕色 */
-      --secondary: #E6DED8;     /* 淺灰棕色 */
-      --text-dark: #4A3F39;     /* 深咖啡色 */
-      --accent: #C49A87;        /* 陶土棕 */
+      --bg-color: #F4F0EA;      
+      --primary: #A68A7E;       
+      --secondary: #E6DED8;     
+      --text-dark: #4A3F39;     
+      --accent: #C49A87;        
     }
     
-    * { box-sizing: border-box; font-family: 'Helvetica Neue', Arial, 'PingFang TC', '微軟正黑體', sans-serif; }
+    * { box-sizing: border-box; font-family: 'Helvetica Neue', Arial, 'PingFang TC', sans-serif; }
     body { background-color: var(--bg-color); color: var(--text-dark); margin: 0; padding: 20px; line-height: 1.6; }
     h1, h2, h3 { color: var(--text-dark); text-align: center; font-weight: normal; margin-bottom: 20px; letter-spacing: 2px;}
     
-/* 替換為包含伸展動態圖的新樣式 */
-#loading-view {
-  position: fixed;
-  top: 0; left: 0; width: 100%; height: 100%;
-  background-color: var(--bg-color);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-}
-
-/* 載入器主容器 */
-.soma-loader-container {
-  position: relative;
-  width: 220px;
-  height: 220px;
-  display: block;
-  margin: 0 auto;
-}
-
-/* 外圈旋轉的 SVG */
-.soma-loader-svg {
-  width: 100%;
-  height: 100%;
-  animation: somaRotateCircle 14s linear infinite; /* 優雅的慢速旋轉 */
-}
-
-.soma-loader-text {
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 1.8px;
-  fill: var(--primary);
-  font-family: 'Helvetica Neue', Arial, sans-serif;
-}
-
-/* 中間的核心內容區（含伸展小人與文字） */
-.soma-loader-center {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-/* 伸展小人本體 SVG 設定 */
-.soma-stretching-person {
-  width: 55px;
-  height: 55px;
-  margin-bottom: 5px;
-}
-
-/* 伸展線條動畫設定：控制呼吸與側邊延展 */
-.soma-body-line {
-  stroke: var(--accent);
-  stroke-width: 3;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  fill: none;
-  animation: somaYogaStretch 3.5s ease-in-out infinite alternate;
-  transform-origin: 25px 45px; /* 以骨盆腳底為中心點延展 */
-}
-
-.soma-head-circle {
-  fill: var(--accent);
-  animation: somaHeadMove 3.5s ease-in-out infinite alternate;
-  transform-origin: 25px 45px;
-}
-
-/* 讀取文字 */
-.soma-text-label {
-  font-size: 13px;
-  color: var(--text-dark);
-  letter-spacing: 1px;
-  font-weight: normal;
-  white-space: nowrap;
-  margin-top: 4px;
-}
-
-/* 三個點點的跑馬燈動態 */
-.soma-dots::after {
-  content: '';
-  animation: somaBlinkDots 1.5s infinite steps(1);
-}
-
-/* 宣告動畫：外圍文字圈旋轉 */
-@keyframes somaRotateCircle {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-/* 宣告動畫：小人身體線條流暢伸展 */
-@keyframes somaYogaStretch {
-  0% {
-    /* 初始站立與單手微傾斜準備姿勢 */
-    transform: scaleY(0.96) skewX(-2deg);
-  }
-  100% {
-    /* 向上與向側邊深層延展（側角伸展式流動） */
-    transform: scaleY(1.04) skewX(6deg);
-  }
-}
-
-/* 宣告動畫：頭部跟隨脊椎延展位移 */
-@keyframes somaHeadMove {
-  0% {
-    transform: scaleY(0.96) translate(-0.5px, 1px);
-  }
-  100% {
-    transform: scaleY(1.04) translate(4px, -2px);
-  }
-}
-
-/* 宣告動畫：點點跑馬燈 */
-@keyframes somaBlinkDots {
-  0% { content: ''; }
-  25% { content: '.'; }
-  50% { content: '..'; }
-  75% { content: '...'; }
-  100% { content: ''; }
-}
+    /* 載入中動態樣式 */
+    #loading-view {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background-color: var(--bg-color); display: flex; align-items: center; justify-content: center; z-index: 9999;
+    }
+    .soma-loader-container { position: relative; width: 220px; height: 220px; display: block; margin: 0 auto; }
+    .soma-loader-svg { width: 100%; height: 100%; animation: somaRotateCircle 14s linear infinite; }
+    .soma-loader-text { font-size: 11px; font-weight: 500; letter-spacing: 1.8px; fill: var(--primary); }
+    .soma-loader-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .soma-stretching-person { width: 55px; height: 55px; margin-bottom: 5px; }
+    .soma-body-line { stroke: var(--accent); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; fill: none; animation: somaYogaStretch 3.5s ease-in-out infinite alternate; transform-origin: 25px 45px; }
+    .soma-head-circle { fill: var(--accent); animation: somaHeadMove 3.5s ease-in-out infinite alternate; transform-origin: 25px 45px; }
+    .soma-text-label { font-size: 13px; color: var(--text-dark); letter-spacing: 1px; margin-top: 4px; }
+    .soma-dots::after { content: ''; animation: somaBlinkDots 1.5s infinite steps(1); }
     
-    /* 隱藏區塊用 */
+    @keyframes somaRotateCircle { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    @keyframes somaYogaStretch { 0% { transform: scaleY(0.96) skewX(-2deg); } 100% { transform: scaleY(1.04) skewX(6deg); } }
+    @keyframes somaHeadMove { 0% { transform: scaleY(0.96) translate(-0.5px, 1px); } 100% { transform: scaleY(1.04) translate(4px, -2px); } }
+    @keyframes somaBlinkDots { 0% { content: ''; } 25% { content: '.'; } 50% { content: '..'; } 75% { content: '...'; } 100% { content: ''; } }
+    
     .hidden { display: none !important; }
-    
-    /* 卡片與容器設計 */
     .container { max-width: 400px; margin: 0 auto; background: #FFF; border-radius: 16px; padding: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
     
-    /* 表單設計 */
     .form-group { margin-bottom: 16px; }
     .form-group label { display: block; font-size: 14px; margin-bottom: 6px; color: var(--text-dark); }
-    .form-group input { width: 100%; padding: 12px; border: 1px solid var(--secondary); border-radius: 8px; font-size: 16px; background: var(--bg-color); color: var(--text-dark); outline: none;}
-    .form-group input:focus { border-color: var(--primary); }
+    .form-group input, .form-group select { width: 100%; padding: 12px; border: 1px solid var(--secondary); border-radius: 8px; font-size: 16px; background: var(--bg-color); outline: none; }
     
-    /* 按鈕設計 */
     .btn { width: 100%; background: var(--primary); color: #FFF; border: none; padding: 14px; border-radius: 8px; font-size: 16px; cursor: pointer; letter-spacing: 1px; transition: 0.3s; }
-    .btn:active { background: var(--text-dark); }
     
-    /* 會員檔案區 */
     .profile-header { display: flex; align-items: center; margin-bottom: 24px; }
     .profile-pic { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid var(--secondary); margin-right: 16px; }
     .profile-name { font-size: 20px; font-weight: bold; }
     
-    /* 點數區塊 */
     .points-box { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 24px; }
     .point-card { flex: 1; background: var(--secondary); padding: 16px; border-radius: 12px; text-align: center; }
     .point-card span { display: block; font-size: 14px; margin-bottom: 4px; }
     .point-card strong { font-size: 28px; color: var(--accent); }
     .expiry-date { text-align: center; font-size: 12px; color: #888; margin-top: -10px; margin-bottom: 24px; }
     
-    /* 明細列表 */
     .log-list { border-top: 1px solid var(--secondary); padding-top: 16px; }
     .log-item { background: var(--bg-color); padding: 12px; border-radius: 8px; margin-bottom: 12px; font-size: 14px; }
     .log-header { display: flex; justify-content: space-between; margin-bottom: 6px; color: #888; font-size: 12px; }
@@ -181,50 +67,43 @@
 </head>
 <body>
 
+  <!-- 動態載入畫面 -->
   <div id="loading-view">
-  <div class="soma-loader-container">
-    
-    <div class="soma-loader-center">
-      <svg class="soma-stretching-person" viewBox="0 0 50 50">
-        <path class="soma-body-line" d="M 25,45 L 25,32 L 23,20 L 36,7 M 25,32 L 15,45 M 23,20 L 12,16" />
-        <circle class="soma-head-circle" cx="21" cy="13" r="3.5" />
+    <div class="soma-loader-container">
+      <div class="soma-loader-center">
+        <svg class="soma-stretching-person" viewBox="0 0 50 50">
+          <path class="soma-body-line" d="M 25,45 L 25,32 L 23,20 L 36,7 M 25,32 L 15,45 M 23,20 L 12,16" />
+          <circle class="soma-head-circle" cx="21" cy="13" r="3.5" />
+        </svg>
+        <div class="soma-text-label">讀取中<span class="soma-dots"></span></div>
+      </div>
+      <svg class="soma-loader-svg" viewBox="0 0 220 220">
+        <path id="somaTextPath" d="M 110, 110 m -72, 0 a 72,72 0 1,1 144,0 a 72,72 0 1,1 -144,0" fill="none" />
+        <text class="soma-loader-text">
+          <textPath href="#somaTextPath" startOffset="0%">
+            THE SOMA STUDIO • THE SOMA STUDIO • THE SOMA STUDIO • 
+          </textPath>
+        </text>
       </svg>
-      <div class="soma-text-label">讀取中<span class="soma-dots"></span></div>
     </div>
-
-    <svg class="soma-loader-svg" viewBox="0 0 220 220">
-      <path id="somaTextPath" d="M 110, 110 m -72, 0 a 72,72 0 1,1 144,0 a 72,72 0 1,1 -144,0" fill="none" />
-      <text class="soma-loader-text">
-        <textPath href="#somaTextPath" startOffset="0%">
-          THE SOMA STUDIO • THE SOMA STUDIO • THE SOMA STUDIO • 
-        </textPath>
-      </text>
-    </svg>
-
   </div>
-</div>
 
+  <!-- 註冊畫面 -->
   <div id="register-view" class="container hidden">
     <h2>Welcome to SOMA</h2>
-    <p style="text-align:center; font-size:14px; color:#888;">初次見面！請填寫基本資料完成綁定</p>
+    <p style="text-align:center; font-size:14px; color:#888;">初次見面！請填寫基本資料</p>
     <div class="form-group">
       <label>真實姓名</label>
       <input type="text" id="reg-name" placeholder="請輸入姓名">
     </div>
     <div class="form-group">
-  <label>生日</label>
-  <div style="display: table; width: 100%; border-collapse: separate; border-spacing: 6px 0; margin-left: -6px;">
-    <div style="display: table-cell; width: 40%;">
-      <select id="reg-birth-year" style="width: 100%; padding: 12px; border: 1px solid var(--secondary); border-radius: 8px; font-size: 16px; background: var(--bg-color); color: var(--text-dark); outline: none;"></select>
+      <label>生日</label>
+      <div style="display: table; width: 100%; border-collapse: separate; border-spacing: 6px 0; margin-left: -6px;">
+        <div style="display: table-cell; width: 40%;"><select id="reg-birth-year"></select></div>
+        <div style="display: table-cell; width: 30%;"><select id="reg-birth-month"></select></div>
+        <div style="display: table-cell; width: 30%;"><select id="reg-birth-day"></select></div>
+      </div>
     </div>
-    <div style="display: table-cell; width: 30%;">
-      <select id="reg-birth-month" style="width: 100%; padding: 12px; border: 1px solid var(--secondary); border-radius: 8px; font-size: 16px; background: var(--bg-color); color: var(--text-dark); outline: none;"></select>
-    </div>
-    <div style="display: table-cell; width: 30%;">
-      <select id="reg-birth-day" style="width: 100%; padding: 12px; border: 1px solid var(--secondary); border-radius: 8px; font-size: 16px; background: var(--bg-color); color: var(--text-dark); outline: none;"></select>
-    </div>
-  </div>
-</div>
     <div class="form-group">
       <label>手機號碼</label>
       <input type="tel" id="reg-phone" placeholder="09xxxxxxxx">
@@ -232,201 +111,157 @@
     <button class="btn" onclick="submitRegistration()">完成註冊</button>
   </div>
 
+  <!-- 學員儀表板 -->
   <div id="dashboard-view" class="container hidden">
     <div class="profile-header">
       <img id="user-pic" class="profile-pic" src="" alt="大頭照">
+      <!-- 姓名與年齡將整合於此 -->
       <div id="user-name" class="profile-name">載入中...</div>
     </div>
     
     <div class="points-box">
       <div class="point-card">
-        <span>器械點數</span>
-        <strong id="apparatus-pts">0</strong>
+        <span>器械點數</span><strong id="apparatus-pts">0</strong>
       </div>
       <div class="point-card">
-        <span>墊上點數</span>
-        <strong id="mat-pts">0</strong>
+        <span>墊上點數</span><strong id="mat-pts">0</strong>
       </div>
     </div>
     <div class="expiry-date" id="expiry-date">到期日：-</div>
     
     <h3>使用明細</h3>
     <div id="log-container" class="log-list">
-      </div>
+      <!-- 依日期分類的明細將插入於此 -->
+    </div>
   </div>
 
   <script>
     // ==========================================
-    // 請在這裡替換成你專屬的鑰匙！ (請保留引號)
-    // ==========================================
-    const MY_LIFF_ID = "2009363159-G4lneBJY"; 
-    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwjVzYLsjAWSfIaB6lT68GZBF4w-Facr_QrPOCwk0cUVPDvqPvwaeiexi9p05kurnfD/exec";
+    const MY_LIFF_ID = "『請替換成階段二取得的_LIFF_ID』"; 
+    const GAS_API_URL = "『請替換成階段一取得的_網頁應用程式URL』";
     // ==========================================
 
     let liffProfile = null;
 
-    // 1. 初始化 LIFF
-    async function initSystem() {
-        initBirthdayDropdowns(); // <-- 請精準插入這一行
-      try {
-        await liff.init({ liffId: MY_LIFF_ID });
-        if (!liff.isLoggedIn()) {
-          liff.login();
-        } else {
-          liffProfile = await liff.getProfile();
-          checkStudentData(liffProfile.userId);
-        }
-      } catch (err) {
-        alert("LIFF 初始化失敗，請確認 LIFF ID 是否正確。\n錯誤訊息: " + err);
+    // 計算年齡輔助函式
+    function calculateAge(birthdayStr) {
+      if (!birthdayStr) return "?";
+      const today = new Date();
+      const birthDate = new Date(birthdayStr);
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const m = today.getMonth() - birthDate.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) { age--; }
+      return age;
+    }
+
+    function initBirthdayDropdowns() {
+      const yearSelect = document.getElementById('reg-birth-year'), monthSelect = document.getElementById('reg-birth-month'), daySelect = document.getElementById('reg-birth-day');
+      for (let y = 2026; y >= 1950; y--) {
+        let opt = document.createElement('option'); opt.value = y; opt.text = y + " 年";
+        if (y === 1990) opt.selected = true; yearSelect.appendChild(opt);
+      }
+      for (let m = 1; m <= 12; m++) {
+        let opt = document.createElement('option'); opt.value = String(m).padStart(2, '0'); opt.text = m + " 月"; monthSelect.appendChild(opt);
+      }
+      for (let d = 1; d <= 31; d++) {
+        let opt = document.createElement('option'); opt.value = String(d).padStart(2, '0'); opt.text = d + " 日"; daySelect.appendChild(opt);
       }
     }
 
-    // 2. 透過 API 檢查學員資料
+    async function initSystem() {
+      initBirthdayDropdowns(); 
+      try {
+        await liff.init({ liffId: MY_LIFF_ID });
+        if (!liff.isLoggedIn()) liff.login();
+        else {
+          liffProfile = await liff.getProfile();
+          checkStudentData(liffProfile.userId);
+        }
+      } catch (err) { alert("LIFF 初始化失敗"); }
+    }
+
     async function checkStudentData(uid) {
       try {
         const response = await fetch(`${GAS_API_URL}?action=getStudentData&uid=${uid}`);
         const result = await response.json();
-        
         document.getElementById('loading-view').classList.add('hidden');
-
-        if (result.isRegistered) {
-          showDashboard(result.profile, result.logs);
-        } else {
-          document.getElementById('register-view').classList.remove('hidden');
-        }
-      } catch (err) {
-        alert("連線資料庫失敗，請稍後再試。");
-      }
+        if (result.isRegistered) showDashboard(result.profile, result.logs);
+        else document.getElementById('register-view').classList.remove('hidden');
+      } catch (err) { alert("連線失敗，請稍後再試。"); }
     }
 
-    // 3. 顯示註冊畫面並送出資料
     async function submitRegistration() {
-      // 替換為這段新程式碼
-        const name = document.getElementById('reg-name').value;
-        const phone = document.getElementById('reg-phone').value;
+      const name = document.getElementById('reg-name').value;
+      const phone = document.getElementById('reg-phone').value;
+      const year = document.getElementById('reg-birth-year').value;
+      const month = document.getElementById('reg-birth-month').value;
+      const day = document.getElementById('reg-birth-day').value;
+      const birthday = `${year}-${month}-${day}`; 
 
-        // 分開讀取並組合成 YYYY-MM-DD
-        const year = document.getElementById('reg-birth-year').value;
-        const month = document.getElementById('reg-birth-month').value;
-        const day = document.getElementById('reg-birth-day').value;
-        const birthday = `${year}-${month}-${day}`;
-
-      if (!name || !birthday || !phone) {
-        alert("請完整填寫所有資料唷！");
-        return;
-      }
+      if (!name || !phone) { alert("請填寫姓名與手機喔！"); return; }
 
       document.getElementById('register-view').classList.add('hidden');
       document.getElementById('loading-view').classList.remove('hidden');
 
-      const postData = {
-        action: "registerStudent",
-        uid: liffProfile.userId,
-        nickname: liffProfile.displayName,
-        avatar: liffProfile.pictureUrl || "",
-        name: name,
-        birthday: birthday,
-        phone: phone
-      };
-
+      const postData = { action: "registerStudent", uid: liffProfile.userId, nickname: liffProfile.displayName, avatar: liffProfile.pictureUrl || "", name: name, birthday: birthday, phone: phone };
       try {
-        const response = await fetch(GAS_API_URL, {
-          method: "POST",
-          body: JSON.stringify(postData)
-        });
+        const response = await fetch(GAS_API_URL, { method: "POST", body: JSON.stringify(postData) });
         const result = await response.json();
-        
-        if (result.success) {
-          alert("註冊成功！系統為您跳轉。");
-          // 重新讀取資料
-          checkStudentData(liffProfile.userId);
-        } else {
-          alert("註冊失敗：" + result.message);
-        }
-      } catch (err) {
-        alert("系統發生錯誤，請通知老師協助。");
-      }
+        if (result.success) checkStudentData(liffProfile.userId);
+        else alert("註冊失敗：" + result.message);
+      } catch (err) { alert("系統發生錯誤。"); }
     }
 
-    // 4. 顯示學員儀表板與明細
     function showDashboard(profile, logs) {
       document.getElementById('dashboard-view').classList.remove('hidden');
-      
-      // 填入基本資料
       document.getElementById('user-pic').src = profile.avatar || "https://via.placeholder.com/60";
-      document.getElementById('user-name').innerText = profile.name + " (" + profile.nickname + ")";
+      
+      // 動態組合姓名、暱稱與計算出的年齡
+      const ageStr = calculateAge(profile.birthday);
+      document.getElementById('user-name').innerText = `${profile.name} (${profile.nickname}, ${ageStr}歲)`;
+      
       document.getElementById('apparatus-pts').innerText = profile.apparatusPoints;
       document.getElementById('mat-pts').innerText = profile.matPoints;
       document.getElementById('expiry-date').innerText = "點數到期日：" + (profile.expiryDate || "尚未設定");
 
-      // 填入歷史明細清單
       const logContainer = document.getElementById('log-container');
-      logContainer.innerHTML = ""; // 清空
+      logContainer.innerHTML = ""; 
 
       if (logs.length === 0) {
-        logContainer.innerHTML = "<p style='text-align:center; color:#888;'>目前還沒有點數異動紀錄喔！</p>";
+        logContainer.innerHTML = "<p style='text-align:center; color:#888;'>目前還沒有異動紀錄喔！</p>";
         return;
       }
 
+      // 將明細依日期群組化
+      const groupedLogs = {};
       logs.forEach(log => {
-        let actionWord = log.pointsChange > 0 ? "儲值" : "扣除";
-        let sign = log.pointsChange > 0 ? "+" : "";
-        let color = log.pointsChange > 0 ? "green" : "red";
-        
-        let logHtml = `
-          <div class="log-item">
-            <div class="log-header">
-              <span>${log.timestamp}</span>
-              <span style="color:${color}">${sign}${log.pointsChange} 點</span>
-            </div>
-            <div class="log-title">${log.courseType} ${actionWord} (${log.note || "系統紀錄"})</div>
-        `;
-        
-        // 若有老師的話，則顯示出來
-        if (log.teacherMessage) {
-          logHtml += `<div class="log-message">給你的話：${log.teacherMessage}</div>`;
-        }
-        
-        logHtml += `</div>`;
-        logContainer.innerHTML += logHtml;
+        const datePart = log.timestamp.split(' ')[0] || log.timestamp;
+        const timePart = log.timestamp.split(' ')[1] || '';
+        if (!groupedLogs[datePart]) groupedLogs[datePart] = [];
+        groupedLogs[datePart].push({ ...log, timePart });
       });
+
+      for (const dateKey in groupedLogs) {
+        logContainer.innerHTML += `<div style="background:var(--secondary); color:var(--text-dark); padding:4px 10px; border-radius:6px; font-weight:bold; font-size:13px; margin:14px 0 8px 0;">📅 ${dateKey}</div>`;
+        
+        groupedLogs[dateKey].forEach(log => {
+          let sign = log.pointsChange > 0 ? "+" : "";
+          let color = log.pointsChange > 0 ? "#6E8573" : "#A95A4E"; 
+          let itemHtml = `
+            <div class="log-item">
+              <div class="log-header">
+                <span>⏳ 時間：${log.timePart || dateKey}</span>
+                <span style="color:${color}; font-size:14px; font-weight:bold;">${sign}${log.pointsChange} 點</span>
+              </div>
+              <div class="log-title">項目：${log.courseType}點數 (${log.note || "無主旨"})</div>
+              ${log.teacherMessage ? `<div class="log-message">💬 給你的話：${log.teacherMessage}</div>` : ""}
+            </div>
+          `;
+          logContainer.innerHTML += itemHtml;
+        });
+      }
     }
 
-    // 請整段貼入，作為獨立的新區塊
-function initBirthdayDropdowns() {
-  const yearSelect = document.getElementById('reg-birth-year');
-  const monthSelect = document.getElementById('reg-birth-month');
-  const daySelect = document.getElementById('reg-birth-day');
-
-  // 1. 產生年份 (1950 到 2026 年)，並預設開啟 1990
-  for (let y = 2026; y >= 1950; y--) {
-    let opt = document.createElement('option');
-    opt.value = y;
-    opt.text = y + " 年";
-    if (y === 1990) opt.selected = true; // 預設選取 1990
-    yearSelect.appendChild(opt);
-  }
-
-  // 2. 產生月份 (1 到 12 月)，自動補零符合格式
-  for (let m = 1; m <= 12; m++) {
-    let opt = document.createElement('option');
-    let mStr = String(m).padStart(2, '0');
-    opt.value = mStr;
-    opt.text = m + " 月";
-    monthSelect.appendChild(opt);
-  }
-
-  // 3. 產生日期 (1 到 31 日)，自動補零符合格式
-  for (let d = 1; d <= 31; d++) {
-    let opt = document.createElement('option');
-    let dStr = String(d).padStart(2, '0');
-    opt.value = dStr;
-    opt.text = d + " 日";
-    daySelect.appendChild(opt);
-  }
-}
-
-    // 啟動程式
     initSystem();
   </script>
 </body>
