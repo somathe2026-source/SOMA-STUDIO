@@ -19,7 +19,7 @@
     body { background-color: var(--bg-color); color: var(--text-dark); margin: 0; padding: 20px; line-height: 1.6; }
     h1, h2, h3 { color: var(--text-dark); text-align: center; font-weight: normal; margin-bottom: 20px; letter-spacing: 2px;}
     
-    /* 替換為這段新動態載入樣式 */
+/* 替換為包含伸展動態圖的新樣式 */
 #loading-view {
   position: fixed;
   top: 0; left: 0; width: 100%; height: 100%;
@@ -33,8 +33,8 @@
 /* 載入器主容器 */
 .soma-loader-container {
   position: relative;
-  width: 200px;
-  height: 200px;
+  width: 220px;
+  height: 220px;
   display: block;
   margin: 0 auto;
 }
@@ -43,28 +43,61 @@
 .soma-loader-svg {
   width: 100%;
   height: 100%;
-  animation: somaRotateCircle 12s linear infinite; /* 控制旋轉速度，數字愈小轉愈快 */
+  animation: somaRotateCircle 14s linear infinite; /* 優雅的慢速旋轉 */
 }
 
 .soma-loader-text {
-  font-size: 11.5px;
+  font-size: 11px;
   font-weight: 500;
-  letter-spacing: 1.5px;
-  fill: var(--primary); /* 使用莫蘭迪粉棕色 */
+  letter-spacing: 1.8px;
+  fill: var(--primary);
   font-family: 'Helvetica Neue', Arial, sans-serif;
 }
 
-/* 中間的讀取文字 */
+/* 中間的核心內容區（含伸展小人與文字） */
 .soma-loader-center {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  font-size: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 伸展小人本體 SVG 設定 */
+.soma-stretching-person {
+  width: 55px;
+  height: 55px;
+  margin-bottom: 5px;
+}
+
+/* 伸展線條動畫設定：控制呼吸與側邊延展 */
+.soma-body-line {
+  stroke: var(--accent);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+  animation: somaYogaStretch 3.5s ease-in-out infinite alternate;
+  transform-origin: 25px 45px; /* 以骨盆腳底為中心點延展 */
+}
+
+.soma-head-circle {
+  fill: var(--accent);
+  animation: somaHeadMove 3.5s ease-in-out infinite alternate;
+  transform-origin: 25px 45px;
+}
+
+/* 讀取文字 */
+.soma-text-label {
+  font-size: 13px;
   color: var(--text-dark);
   letter-spacing: 1px;
   font-weight: normal;
   white-space: nowrap;
+  margin-top: 4px;
 }
 
 /* 三個點點的跑馬燈動態 */
@@ -73,10 +106,32 @@
   animation: somaBlinkDots 1.5s infinite steps(1);
 }
 
-/* 宣告動畫：文字圈旋轉 */
+/* 宣告動畫：外圍文字圈旋轉 */
 @keyframes somaRotateCircle {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
+}
+
+/* 宣告動畫：小人身體線條流暢伸展 */
+@keyframes somaYogaStretch {
+  0% {
+    /* 初始站立與單手微傾斜準備姿勢 */
+    transform: scaleY(0.96) skewX(-2deg);
+  }
+  100% {
+    /* 向上與向側邊深層延展（側角伸展式流動） */
+    transform: scaleY(1.04) skewX(6deg);
+  }
+}
+
+/* 宣告動畫：頭部跟隨脊椎延展位移 */
+@keyframes somaHeadMove {
+  0% {
+    transform: scaleY(0.96) translate(-0.5px, 1px);
+  }
+  100% {
+    transform: scaleY(1.04) translate(4px, -2px);
+  }
 }
 
 /* 宣告動畫：點點跑馬燈 */
@@ -128,17 +183,24 @@
 
   <div id="loading-view">
   <div class="soma-loader-container">
+    
     <div class="soma-loader-center">
-      讀取中<span class="soma-dots"></span>
+      <svg class="soma-stretching-person" viewBox="0 0 50 50">
+        <path class="soma-body-line" d="M 25,45 L 25,32 L 23,20 L 36,7 M 25,32 L 15,45 M 23,20 L 12,16" />
+        <circle class="soma-head-circle" cx="21" cy="13" r="3.5" />
+      </svg>
+      <div class="soma-text-label">讀取中<span class="soma-dots"></span></div>
     </div>
-    <svg class="soma-loader-svg" viewBox="0 0 200 200">
-      <path id="somaTextPath" d="M 100, 100 m -62, 0 a 62,62 0 1,1 124,0 a 62,62 0 1,1 -124,0" fill="none" />
+
+    <svg class="soma-loader-svg" viewBox="0 0 220 220">
+      <path id="somaTextPath" d="M 110, 110 m -72, 0 a 72,72 0 1,1 144,0 a 72,72 0 1,1 -144,0" fill="none" />
       <text class="soma-loader-text">
         <textPath href="#somaTextPath" startOffset="0%">
           THE SOMA STUDIO • THE SOMA STUDIO • THE SOMA STUDIO • 
         </textPath>
       </text>
     </svg>
+
   </div>
 </div>
 
