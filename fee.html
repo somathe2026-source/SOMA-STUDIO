@@ -86,8 +86,9 @@
   </style>
 
   <script>
-    var HOME_URL = '<?= typeof appUrl !== "undefined" ? appUrl : "" ?>'; 
-  </script>
+  // 自動獲取當前瀏覽器實際的完整基礎網址 (會完美自動對齊 /fee)
+  var HOME_URL = window.location.origin + window.location.pathname; 
+</script>
 </head>
 
 <body class="antialiased selection:bg-gold selection:text-dark pb-20">
