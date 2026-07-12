@@ -64,7 +64,6 @@
     .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--secondary); padding-bottom: 10px; margin-bottom: 14px; }
     .btn-close-modal { background: var(--secondary); border: none; padding: 6px 14px; border-radius: 8px; color: var(--text-dark); font-weight: bold; cursor: pointer; }
     
-    /* 摺疊歷史紀錄設計 */
     .log-group { margin-bottom: 8px; width: 100%; }
     .log-timeline-item { position: relative; background: var(--bg-color); padding: 12px; border-radius: 8px; margin-bottom: 8px; font-size: 13.5px; }
     .btn-delete-log { position: absolute; top: 8px; right: 8px; background: transparent; border: none; color: var(--deduct-color); font-size: 16px; cursor: pointer; padding: 4px; }
@@ -178,11 +177,60 @@
 
   <script>
     // ==========================================
+    // 👇 請填入您專屬的唯一通訊網址
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwjVzYLsjAWSfIaB6lT68GZBF4w-Facr_QrPOCwk0cUVPDvqPvwaeiexi9p05kurnfD/exec";
     // ==========================================
 
     let allStudents = [];
     let currentMode = "扣點"; 
+
+    function customAlert(message, icon = "🔔", title = "系統提示") {
+      return new Promise((resolve) => {
+        document.getElementById('custom-popup-icon').innerText = icon;
+        document.getElementById('custom-popup-title').innerText = title;
+        document.getElementById('custom-popup-message').innerText = message;
+        document.getElementById('custom-popup-cancel').style.display = "none";
+        document.getElementById('custom-popup-input').classList.add('hidden');
+        const confirmBtn = document.getElementById('custom-popup-confirm');
+        confirmBtn.className = "btn-submit bg-add"; confirmBtn.innerText = "確定";
+        document.getElementById('custom-popup-overlay').classList.remove('hidden');
+        confirmBtn.onclick = () => { document.getElementById('custom-popup-overlay').classList.add('hidden'); resolve(true); };
+      });
+    }
+
+    function customConfirm(message, icon = "⚠️", title = "安全防呆確認", isDanger = false) {
+      return new Promise((resolve) => {
+        document.getElementById('custom-popup-icon').innerText = icon;
+        document.getElementById('custom-popup-title').innerText = title;
+        document.getElementById('custom-popup-message').innerText = message;
+        document.getElementById('custom-popup-input').classList.add('hidden');
+        const cancelBtn = document.getElementById('custom-popup-cancel');
+        cancelBtn.style.display = "block"; cancelBtn.innerText = "取消";
+        const confirmBtn = document.getElementById('custom-popup-confirm');
+        confirmBtn.className = "btn-submit " + (isDanger ? "bg-deduct" : "bg-add");
+        confirmBtn.innerText = "確定";
+        document.getElementById('custom-popup-overlay').classList.remove('hidden');
+        cancelBtn.onclick = () => { document.getElementById('custom-popup-overlay').classList.add('hidden'); resolve(false); };
+        confirmBtn.onclick = () => { document.getElementById('custom-popup-overlay').classList.add('hidden'); resolve(true); };
+      });
+    }
+
+    function customPrompt(message, title = "請輸入密碼") {
+      return new Promise((resolve) => {
+        document.getElementById('custom-popup-icon').innerText = "🔒";
+        document.getElementById('custom-popup-title').innerText = title;
+        document.getElementById('custom-popup-message').innerText = message;
+        const input = document.getElementById('custom-popup-input');
+        input.classList.remove('hidden'); input.value = "";
+        const cancelBtn = document.getElementById('custom-popup-cancel');
+        cancelBtn.style.display = "block"; cancelBtn.innerText = "取消";
+        const confirmBtn = document.getElementById('custom-popup-confirm');
+        confirmBtn.className = "btn-submit bg-deduct"; confirmBtn.innerText = "確認";
+        document.getElementById('custom-popup-overlay').classList.remove('hidden');
+        cancelBtn.onclick = () => { document.getElementById('custom-popup-overlay').classList.add('hidden'); input.classList.add('hidden'); resolve(null); };
+        confirmBtn.onclick = () => { document.getElementById('custom-popup-overlay').classList.add('hidden'); input.classList.add('hidden'); resolve(input.value); };
+      });
+    }
 
     function cleanDateString(dateStr) {
       if (!dateStr || dateStr === "-" || dateStr === "尚未設定" || dateStr === "無紀錄") return dateStr || "";
@@ -219,7 +267,7 @@
         const res = await fetch(`${GAS_API_URL}?action=getAllStudents`);
         const result = await res.json();
         if(result.success) { allStudents = result.data; renderStudents(allStudents); document.getElementById('loading-msg').classList.add('hidden'); }
-      } catch (err) { await customAlert("連線失敗，請確認網路。", "📶", "連線錯誤"); }
+      } catch (err) { await customAlert("連線失敗，請確認網路與部署網址。", "📶", "連線錯誤"); }
     }
 
     function renderStudents(list) {
@@ -252,7 +300,6 @@
       });
     }
 
-    // ✨ 新增：彈出並填充修改個人資料功能
     function openEditModal(uid) {
       const student = allStudents.find(s => s.uid === uid);
       if (!student) return;
@@ -340,7 +387,6 @@
           `;
 
           const logContainer = document.getElementById('modal-student-logs'); logContainer.innerHTML = "";
-          
           if(result.logs.length === 0) logContainer.innerHTML = "<p style='text-align:center; color:#888; font-size:13px;'>目前無任何點數異動紀錄</p>";
           else {
             const groupedLogs = {};
@@ -351,7 +397,6 @@
               groupedLogs[datePart].push({ ...log, timePart });
             });
 
-            // ✨ 修改：後台明細日期同步支援可收合抽屜並顯示筆數
             for (const dateKey in groupedLogs) {
               const items = groupedLogs[dateKey];
               let groupHtml = `
@@ -362,7 +407,6 @@
                   </summary>
                   <div style="padding-top:4px;">
               `;
-              
               items.forEach(log => {
                 let sign = log.pointsChange > 0 ? "+" : ""; let color = log.pointsChange > 0 ? "var(--add-color)" : "var(--deduct-color)";
                 groupHtml += `
@@ -387,51 +431,53 @@
 
     function closeDetailsModal() { document.getElementById('details-modal').classList.add('hidden'); }
 
+    // 全方位修復與強效安全保障核心
     async function executeSubmit() {
-      const checkboxes = document.querySelectorAll('.student-checkbox:checked');
-      if (checkboxes.length === 0) { await customAlert("請先勾選要處理的學員！", "❌"); return; }
-      
-      const classNote = document.getElementById('class-note').value.trim();
-      const selectedStudents = Array.from(checkboxes).map(cb => ({ uid: cb.value, name: cb.dataset.name }));
-      const pointType = document.getElementById('point-type').value;
-      let rawPoints = Number(document.getElementById('points-change').value);
-      if (isNaN(rawPoints) || rawPoints < 0) { await customAlert("請輸入正確點數！", "❌"); return; }
-      
-      const pointsChange = currentMode === "扣點" ? -1 * rawPoints : rawPoints;
-      const teacherMessage = document.getElementById('teacher-message').value;
-      const expiryDate = document.getElementById('expiry-date').value;
+      try {
+        const checkboxes = document.querySelectorAll('.student-checkbox:checked');
+        if (checkboxes.length === 0) { await customAlert("請先在上方學員清單中，勾選要處理的學員喔！", "❌"); return; }
+        
+        const classNote = document.getElementById('class-note').value.trim();
+        const selectedStudents = Array.from(checkboxes).map(cb => ({ uid: cb.value, name: cb.getAttribute('data-name') }));
+        const pointType = document.getElementById('point-type').value;
+        let rawPoints = Number(document.getElementById('points-change').value);
+        
+        if (isNaN(rawPoints) || rawPoints < 0) { await customAlert("請輸入大於或等於 0 的正確點數數量！", "❌"); return; }
+        
+        const pointsChange = currentMode === "扣點" ? -1 * rawPoints : rawPoints;
+        const teacherMessage = document.getElementById('teacher-message').value;
+        const expiryDate = document.getElementById('expiry-date').value;
 
-      // ✨ 新增：0點儲值效期延展防呆檢查
-      if (currentMode === "加點") {
-        if (rawPoints === 0) {
-          let isExtension = false;
-          selectedStudents.forEach(s => {
-            const match = allStudents.find(item => item.uid === s.uid);
-            if (match && expiryDate) {
-              const currentExp = match.expiryDate ? match.expiryDate.split(' ')[0] : "";
-              if (!currentExp || expiryDate > currentExp) isExtension = true;
+        // 0 點儲效期延展精準防呆審查
+        if (currentMode === "加點") {
+          if (rawPoints === 0) {
+            let isExtension = false;
+            selectedStudents.forEach(s => {
+              const match = allStudents.find(item => item.uid === s.uid);
+              if (match && expiryDate) {
+                const currentExp = match.expiryDate ? match.expiryDate.split(' ')[0] : "";
+                if (!currentExp || expiryDate > currentExp) isExtension = true;
+              }
+            });
+            
+            if (isExtension) {
+              const checkExt = await customConfirm(`⚠️ 【點數效期延展提示】\n偵測到儲值點數為 0 點，且新到期日大於原本效期。\n此操作將以『效期延展』模式送出，確定要更新並發送 LINE 通知給學生嗎？`, "📅", "效期延展審查");
+              if (!checkExt) return;
             }
-          });
-          
-          if (isExtension) {
-            const checkExt = await customConfirm(`⚠️ 【點數效期延展提示】\n偵測到儲值為 0 點且新到期日大於原本到期日。\n此操作將以『日期延展』模式送出，確定要延展並發送通知給學生嗎？`, "📅", "效期延展審查");
-            if (!checkExt) return;
-          }
-        } else if (expiryDate) {
-          const diffDays = Math.ceil((new Date(expiryDate + "T00:00:00") - new Date().setHours(0,0,0,0)) / (1000 * 60 * 60 * 24));
-          if (diffDays < 30) {
-            if (!(await customConfirm(`設定效期僅剩 ${diffDays} 天。\n請問確定維持這個極短時間嗎？`, "⚠️", "重要二次防呆", true))) return; 
+          } else if (expiryDate) {
+            const diffDays = Math.ceil((new Date(expiryDate + "T00:00:00") - new Date().setHours(0,0,0,0)) / (1000 * 60 * 60 * 24));
+            if (diffDays < 30) {
+              if (!(await customConfirm(`設定效期僅剩 ${diffDays} 天。\n請問確定維持這個極短時間嗎？`, "⚠️", "重要二次防呆", true))) return; 
+            }
           }
         }
-      }
 
-      const confirmMsg = `模式：${currentMode}\n項目：${pointType}\n異動：${pointsChange} 點\n備註：${classNote || "無"}\n影響人數：${selectedStudents.length} 位\n\n確定寫入並發送 LINE 推播嗎？`;
-      if (!(await customConfirm(confirmMsg, "💬", "最後確認"))) return;
+        const confirmMsg = `當前模式：${currentMode}\n點數項目：${pointType}\n異動數量：${pointsChange} 點\n內部備註：${classNote || "無"}\n影響人數：${selectedStudents.length} 位\n\n確定要寫入資料庫並推播 LINE 通知嗎？`;
+        if (!(await customConfirm(confirmMsg, "💬", "最後確認"))) return;
 
-      const submitBtn = document.getElementById('submit-btn');
-      submitBtn.disabled = true; submitBtn.innerText = "🚀 系統處理中...";
-      
-      try {
+        const submitBtn = document.getElementById('submit-btn');
+        submitBtn.disabled = true; submitBtn.innerText = "🚀 系統處理中...";
+        
         if (pointType === "雙點") {
           const res1 = await sendVerificationRequest("器械", pointsChange, selectedStudents, classNote, teacherMessage, expiryDate);
           const res2 = await sendVerificationRequest("墊上", pointsChange, selectedStudents, classNote, teacherMessage, expiryDate);
@@ -440,18 +486,24 @@
           const res = await sendVerificationRequest(pointType, pointsChange, selectedStudents, classNote, teacherMessage, expiryDate);
           handleFinalResults([res]);
         }
-      } catch (err) { await customAlert("資料庫中斷，請確認連線。", "📶"); } 
-      finally { submitBtn.disabled = false; submitBtn.innerText = currentMode === "扣點" ? "確認送出核銷" : "確認送出加點儲值"; }
+      } catch (err) {
+        // 全域攔截：即使程式發生任何未預期的崩潰，也會強行噴出代碼日誌，絕對不卡死
+        alert("運作攔截報錯，原因：" + err.toString());
+        const submitBtn = document.getElementById('submit-btn');
+        if(submitBtn) { submitBtn.disabled = false; submitBtn.innerText = currentMode === "扣點" ? "確認送出核銷" : "確認送出加點儲值"; }
+      }
     }
 
     async function sendVerificationRequest(type, change, students, note, msg, expiry) {
-      // 附加傳入 mode: currentMode 幫助後端精準判讀 0 點推播模板
       const postData = { action: "processClassVerification", students: students, courseType: type, pointsChange: change, note: note, teacherMessage: msg, expiryDate: currentMode === "加點" ? expiry : "", mode: currentMode };
       const response = await fetch(GAS_API_URL, { method: "POST", body: JSON.stringify(postData) });
       return await response.json();
     }
 
     async function handleFinalResults(resultsArray) {
+      const submitBtn = document.getElementById('submit-btn');
+      if(submitBtn) { submitBtn.disabled = false; submitBtn.innerText = currentMode === "扣點" ? "確認送出核銷" : "確認送出加點儲值"; }
+
       let summaryText = "";
       resultsArray.forEach(res => { if(res.results) res.results.forEach(r => summaryText += `${r.name}: ${r.success ? "✅ " + r.message : "❌ 失敗"}\n\n`); });
       await customAlert(summaryText, "🎉", "執行完畢報告");
