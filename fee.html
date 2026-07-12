@@ -6,12 +6,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>THE SOMA STUDIO | 專屬方案與報名</title>
 
-  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
 
-  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -32,7 +30,6 @@
         }
   </script>
 
-  <!-- Iconify -->
   <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
 
   <style>
@@ -86,19 +83,17 @@
   </style>
 
   <script>
-  // 自動獲取當前瀏覽器實際的完整基礎網址 (會完美自動對齊 /fee)
-  var HOME_URL = window.location.origin + window.location.pathname; 
-</script>
+    // 自動獲取當前瀏覽器實際的完整基礎網址 (會完美自動對齊 /fee)
+    var HOME_URL = window.location.origin + window.location.pathname; 
+  </script>
 </head>
 
 <body class="antialiased selection:bg-gold selection:text-dark pb-20">
 
   <div class="noise-overlay"></div>
 
-  <!-- Toast 提示框 -->
   <div id="toast" class="fixed bottom-10 left-1/2 transform -translate-x-1/2 bg-gold text-dark px-6 py-3 rounded-full shadow-2xl transition-all duration-300 opacity-0 translate-y-4 pointer-events-none z-[99999] text-sm font-bold tracking-wider"></div>
 
-  <!-- 頂部導覽 (★ 新增 LINE 官方客服按鈕) -->
   <nav class="fixed top-0 left-0 w-full z-40 px-5 py-4 flex justify-between items-center backdrop-blur-md bg-dark/85 border-b border-white/10">
       <a href="home" class="font-serif text-lg tracking-widest text-gold flex items-center gap-2 font-bold">
           <iconify-icon icon="ph:arrow-left-bold"></iconify-icon> 返回首頁
@@ -111,9 +106,6 @@
 
   <main class="min-h-screen pt-24 px-4 md:px-12 max-w-6xl mx-auto flex flex-col items-center w-full">
 
-    <!-- ========================================== -->
-    <!-- VIEW 1: 主選單 (方案列表) -->
-    <!-- ========================================== -->
     <div id="view-main" class="w-full flex flex-col items-center fade-up hidden">
         <header class="text-center mb-10 w-full">
           <h1 class="font-serif text-4xl md:text-5xl mb-2 font-light text-gold">Investment in <span class="italic text-sand font-medium">Yourself.</span></h1>
@@ -122,7 +114,6 @@
 
         <div class="w-full max-w-5xl grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
           
-          <!-- 器械課程 Card -->
           <div class="beam-box p-6 flex flex-col relative overflow-hidden cursor-pointer hover:-translate-y-1 transition-transform" onclick="navTo('eq_detail')">
             <div class="absolute top-4 -right-10 bg-gold/30 text-gold text-[10px] font-bold tracking-widest py-1 px-10 rotate-45 border-y border-gold/50 backdrop-blur-md z-10">RECOMMEND</div>
             <div class="mb-4 flex justify-between items-center">
@@ -150,7 +141,6 @@
             </button>
           </div>
 
-          <!-- 墊上課程 Card -->
           <div class="beam-box p-6 flex flex-col cursor-pointer hover:-translate-y-1 transition-transform" onclick="navTo('mat_detail')">
             <div class="mb-4 flex justify-between items-center">
               <h3 class="font-serif text-2xl text-gold font-bold">墊上課程</h3>
@@ -174,7 +164,6 @@
             </button>
           </div>
 
-          <!-- 其他團課 Card -->
           <div class="beam-box p-6 flex flex-col cursor-pointer hover:-translate-y-1 transition-transform" onclick="window.top.location.href='https://lin.ee/7fCJor9'">
             <div class="mb-4 flex justify-between items-center">
               <h3 class="font-serif text-2xl text-gold font-bold">其他團課</h3>
@@ -200,9 +189,6 @@
         </div>
     </div>
 
-    <!-- ========================================== -->
-    <!-- VIEW 2: 器械課程 介紹頁 -->
-    <!-- ========================================== -->
     <div id="view-eq_detail" class="w-full max-w-2xl flex flex-col fade-up hidden">
         <button onclick="navTo('main')" class="self-start mb-6 text-sm text-gold opacity-100 font-bold flex items-center gap-1"><iconify-icon icon="ph:arrow-left-bold"></iconify-icon> 返回方案列表</button>
         <h2 class="text-3xl font-serif text-gold mb-2 font-bold">器械課程 Pilates Equipment</h2>
@@ -258,9 +244,6 @@
         </button>
     </div>
 
-    <!-- ========================================== -->
-    <!-- VIEW 3: 墊上課程 介紹頁 -->
-    <!-- ========================================== -->
     <div id="view-mat_detail" class="w-full max-w-2xl flex flex-col fade-up hidden">
         <button onclick="navTo('main')" class="self-start mb-6 text-sm text-gold opacity-100 font-bold flex items-center gap-1"><iconify-icon icon="ph:arrow-left-bold"></iconify-icon> 返回方案列表</button>
         <h2 class="text-3xl font-serif text-gold mb-2 font-bold">墊上課程 Mat Pilates & Gyrokinesis</h2>
@@ -315,9 +298,6 @@
         </button>
     </div>
 
-    <!-- ========================================== -->
-    <!-- VIEW 4: 器械課程 報名表單 -->
-    <!-- ========================================== -->
     <div id="view-eq_signup" class="w-full max-w-lg flex flex-col fade-up hidden">
         <button onclick="navTo('eq_detail')" class="self-start mb-4 text-sm text-gold opacity-100 font-bold flex items-center gap-1 hover:opacity-100"><iconify-icon icon="ph:arrow-left-bold"></iconify-icon> 返回介紹</button>
         <h2 class="text-2xl font-serif text-gold font-bold mb-1 border-b border-white/20 pb-4">器械課程 報名資料</h2>
@@ -384,9 +364,6 @@
         </form>
     </div>
 
-    <!-- ========================================== -->
-    <!-- VIEW 5: 墊上課程 報名表單 -->
-    <!-- ========================================== -->
     <div id="view-mat_signup" class="w-full max-w-lg flex flex-col fade-up hidden">
         <button onclick="navTo('mat_detail')" class="self-start mb-4 text-sm text-gold opacity-100 font-bold flex items-center gap-1 hover:opacity-100"><iconify-icon icon="ph:arrow-left-bold"></iconify-icon> 返回介紹</button>
         <h2 class="text-2xl font-serif text-gold font-bold mb-1 border-b border-white/20 pb-4">墊上課程 報名資料</h2>
@@ -447,9 +424,6 @@
         </form>
     </div>
 
-    <!-- ========================================== -->
-    <!-- VIEW CONFIRM: 填寫確認頁 -->
-    <!-- ========================================== -->
     <div id="view-confirm" class="w-full max-w-sm flex flex-col items-center fade-up hidden pb-10">
         <h2 class="text-2xl font-serif text-sand mb-2 text-center font-bold">請確認報名資料</h2>
         <p class="text-sm opacity-90 font-medium mb-6 tracking-wide text-center">請仔細核對您填寫的資訊，確認無誤後送出。</p>
@@ -479,16 +453,11 @@
         </div>
     </div>
 
-    <!-- ========================================== -->
-    <!-- VIEW 6: 截圖總結頁 -->
-    <!-- ========================================== -->
     <div id="view-summary" class="w-full max-w-sm flex flex-col items-center fade-up hidden pb-10">
         <h2 class="text-2xl font-serif text-sand mb-2 text-center font-bold">申請已完成</h2>
         <p class="text-sm opacity-100 font-medium mb-6 tracking-wide text-center leading-relaxed text-gold">請截圖此畫面傳送至官方 LINE，<br>專人確認匯款後即為您開通權限。</p>
 
-        <!-- Receipt Card -->
         <div class="bg-sand text-dark w-full rounded-2xl p-6 shadow-2xl relative mb-8 border-2 border-gold" id="receipt-card">
-            <!-- Deco -->
             <div class="absolute -top-3 -right-3 w-16 h-16 bg-gold rounded-full opacity-40 blur-xl"></div>
             
             <div class="text-center mb-6 border-b border-dark/10 pb-4 relative z-10">
@@ -525,6 +494,11 @@
   </main>
 
   <script>
+    // ==========================================
+    // 👇 請填寫您綁定的 GAS 網頁應用程式 URL
+    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwjVzYLsjAWSfIaB6lT68GZBF4w-Facr_QrPOCwk0cUVPDvqPvwaeiexi9p05kurnfD/exec";
+    // ==========================================
+
     // Toast Alert Function
     var toastTimeout;
     function showMsg(msg) {
@@ -680,54 +654,8 @@
         }
     }
 
-        google.script.run.withSuccessHandler(function(res) {
-            if(res.success) {
-                document.getElementById('sum-type').innerText = pendingSubmitData.type + '課程';
-                document.getElementById('sum-plan').innerText = pendingSubmitData.plan;
-                document.getElementById('sum-amount').innerText = pendingSubmitData.amount;
-                document.getElementById('sum-name').innerText = pendingSubmitData.name;
-                document.getElementById('sum-phone').innerText = pendingSubmitData.phone;
-                document.getElementById('sum-line').innerText = pendingSubmitData.line;
-                document.getElementById('sum-bank').innerText = pendingSubmitData.bank;
-                
-                btn.innerHTML = '確認無誤，正式送出';
-                btn.disabled = false;
-                
-                navTo('summary');
-            } else {
-                alert('報名失敗：' + res.msg);
-                btn.innerHTML = '確認無誤，正式送出';
-                btn.disabled = false;
-            }
-        }).withFailureHandler(function(err) {
-            alert('系統連線錯誤：' + err);
-            btn.innerHTML = '確認無誤，正式送出';
-            btn.disabled = false;
-        }).submitSignup(pendingSubmitData);
-    }
-
-    // ==========================================
-    // ★ 新增：動態載入時段選項功能
-    // ==========================================
-    // ★ 新增：動態載入時段選項功能 (支援專屬營業時間)
-    // ==========================================
+    // ★ 取消載入 GAS 動態時段，直接降級為手動輸入模式
     function loadTimeSlots() {
-        if (typeof google !== 'undefined' && google.script) {
-            google.script.run.withSuccessHandler(function(res) {
-                if (res && res.success && res.useAutoFilter) {
-                    populateTimeDropdowns(res.schedules, res.businessHours || {});
-                } else {
-                    fallbackToManualTime();
-                }
-            }).withFailureHandler(function() {
-                fallbackToManualTime();
-            }).getFeePageConfig();
-        } else {
-            fallbackToManualTime();
-        }
-    }
-
-    function fallbackToManualTime() {
         ['eq', 'mat'].forEach(type => {
             const hint = document.getElementById('time-hint_' + type);
             const input = document.getElementById('pref_time_input_' + type);
@@ -738,73 +666,7 @@
         });
     }
 
-    function populateTimeDropdowns(schedules, businessHours) {
-        const days = ['週日', '週一', '週二', '週三', '週四', '週五', '週六'];
-        let html = '<option value="">請選擇時段...</option>';
-        
-        for (let d = 1; d <= 7; d++) {
-            let dayIdx = d === 7 ? 0 : d; // 調整為 1-6(一~六) 加上 0(日)
-
-            // ★ 修改：如果該天沒有在設定表內(沒有營業時間)，顯示 [公休]
-            if (!businessHours[dayIdx]) {
-                html += `<optgroup label="${days[dayIdx]} [公休]" class="bg-dark text-white/40"></optgroup>`;
-                continue;
-            }
-
-            let startH = businessHours[dayIdx].start;
-            let endH = businessHours[dayIdx].end;
-            let hasAvailableSlot = false;
-            let optionsHtml = '';
-
-            for (let h = startH; h <= endH; h++) {
-                for (let m of [0, 30]) {
-                    // 假設營業到 21:00，就不顯示 21:30 的選項
-                    if (h === endH && m > 0) continue;
-
-                    let slotMins = h * 60 + m;
-                    
-                    // 檢查是否在此星期重疊到任一課程 (+- 90 分鐘緩衝)
-                    let isExcluded = schedules.some(s => {
-                        if (s.day !== dayIdx) return false;
-                        if (!s.time) return false;
-                        let timeParts = s.time.split(':');
-                        let sStart = parseInt(timeParts[0]) * 60 + parseInt(timeParts[1]);
-                        let sEnd = sStart + parseInt(s.duration || 60);
-                        return (slotMins >= sStart - 90 && slotMins <= sEnd + 90);
-                    });
-                    
-                    if (!isExcluded) {
-                        let timeStr = String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
-                        optionsHtml += `<option value="${days[dayIdx]} ${timeStr}" class="bg-dark text-sand">${days[dayIdx]} ${timeStr}</option>`;
-                        hasAvailableSlot = true;
-                    }
-                }
-            }
-            
-            // ★ 修改：判斷該天是否還有剩餘空檔
-            if (!hasAvailableSlot) {
-                html += `<optgroup label="${days[dayIdx]} [額滿]" class="bg-dark text-white/40"></optgroup>`;
-            } else {
-                html += `<optgroup label="${days[dayIdx]}" class="bg-dark text-gold">${optionsHtml}</optgroup>`;
-            }
-        }
-
-        ['eq', 'mat'].forEach(type => {
-            const hint = document.getElementById('time-hint_' + type);
-            const input = document.getElementById('pref_time_input_' + type);
-            const select = document.getElementById('pref_time_select_' + type);
-            if(hint) hint.innerText = '(僅顯示可預約空檔)';
-            if(input) { input.disabled = true; input.classList.add('hidden'); input.required = false; }
-            if(select) { 
-                select.innerHTML = html; 
-                select.disabled = false; 
-                select.classList.remove('hidden'); 
-                select.required = true; 
-            }
-        });
-    }
-
-    // 頁面載入後自動向後端拉取時段設定
+    // 頁面載入後執行
     window.addEventListener('load', loadTimeSlots);
   </script>
 </body>
