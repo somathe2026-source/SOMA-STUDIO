@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>THE SOMA STUDIO | 頂級體態管理</title>
+    
+    <!-- Google Fonts: Cormorant Garamond (Serif) & Inter (Sans) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        serif: ['"Cormorant Garamond"', 'serif'],
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        dark: '#14110F',   /* 溫暖深褐色 */
+                        sand: '#EAE0D5',   /* 奶沙白 */
+                        gold: '#C8A97E',   /* 經典暖金 */
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Iconify -->
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+
+    <style>
+        /* Global & Noise */
+        body {
+            background-color: #14110F;
+            color: #EAE0D5;
+            overflow-x: hidden;
+            cursor: none; /* Hide default cursor for custom one */
+        }
+        
+        .noise-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            pointer-events: none;
+            z-index: 50;
+            opacity: 0.04;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        /* Custom Cursor */
+        .cursor-dot {
+            position: fixed; top: 0; left: 0; width: 8px; height: 8px;
+            background-color: #EAE0D5; border-radius: 50%;
+            pointer-events: none; z-index: 100;
+            transform: translate(-50%, -50%);
+            mix-blend-mode: difference;
+        }
+        .cursor-halo {
+            position: fixed; top: 0; left: 0; width: 600px; height: 600px;
+            background: radial-gradient(circle, rgba(200, 169, 126, 0.15) 0%, rgba(20, 17, 15, 0) 60%);
+            border-radius: 50%; pointer-events: none; z-index: 49;
+            transform: translate(-50%, -50%);
+        }
+
+        /* Vertical Grid Lines */
+        .grid-lines {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            display: flex; justify-content: space-between;
+            pointer-events: none; z-index: 0;
+            padding: 0 5%;
+        }
+        .grid-line {
+            width: 1px; height: 100%;
+            background: linear-gradient(to bottom, rgba(234,224,213,0) 0%, rgba(234,224,213,0.05) 50%, rgba(234,224,213,0) 100%);
+        }
+
+        /* Glassmorphism */
+        .glass {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .glass-btn {
+            background: rgba(200, 169, 126, 0.1);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(200, 169, 126, 0.3);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .glass-btn:hover {
+            background: rgba(200, 169, 126, 0.2);
+            border: 1px solid rgba(200, 169, 126, 0.6);
+            transform: translateY(-2px);
+        }
+
+        /* Text Clip Utility */
+        .clip-wrap { overflow: hidden; }
+        .clip-text { transform: translateY(110%); }
+
+        /* Marquee */
+        .marquee-container {
+            width: 100vw; overflow: hidden; white-space: nowrap;
+            border-top: 1px solid rgba(234,224,213,0.1);
+            border-bottom: 1px solid rgba(234,224,213,0.1);
+            padding: 1.5rem 0;
+        }
+        .marquee-content {
+            display: inline-block;
+            animation: marquee 20s linear infinite;
+        }
+        @keyframes marquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        /* Image Reveal Mask */
+        .img-reveal {
+            clip-path: polygon(0 0, 100% 0, 100% 0, 0 0);
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-gold selection:text-dark">
+
+    <!-- Ambient / UI Overlays -->
+    <div class="noise-overlay"></div>
+    <div class="cursor-dot" id="cursor-dot"></div>
+    <div class="cursor-halo" id="cursor-halo"></div>
+    
+    <div class="grid-lines">
+        <div class="grid-line"></div>
+        <div class="grid-line"></div>
+        <div class="grid-line"></div>
+        <div class="grid-line"></div>
+        <div class="grid-line"></div>
+    </div>
+
+    <!-- Navigation (手機版優化折行) -->
+    <nav class="fixed top-0 left-0 w-full z-40 px-4 py-4 md:px-12 flex flex-wrap justify-between items-center mix-blend-difference">
+        <a href="#" class="font-serif text-lg md:text-2xl tracking-widest font-light hover:text-gold transition-colors">THE SOMA</a>
+        
+        <div class="flex gap-4 md:gap-8 text-[10px] sm:text-xs md:text-sm font-sans tracking-widest opacity-80 order-last md:order-none w-full md:w-auto justify-center mt-3 md:mt-0">
+            <a href="#about" class="hover:opacity-100 hover:text-gold transition-colors">品牌理念</a>
+            <a href="#instructor" class="hover:opacity-100 hover:text-gold transition-colors">核心師資</a>
+            <a href="<?= appUrl ?>?page=fee" target="_top" class="hover:opacity-100 hover:text-gold transition-colors">收費與權益</a>
+        </div>
+
+        <a href="<?= appUrl ?>?page=booking" target="_top" class="glass-btn px-4 py-1.5 md:px-6 md:py-2 rounded-full text-[10px] md:text-sm tracking-widest uppercase text-center inline-block">
+            專屬預約
+        </a>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="relative w-full h-screen flex flex-col justify-center items-center px-6 z-10">
+        <!-- Background Image with Parallax -->
+        <div class="absolute inset-0 z-0 overflow-hidden">
+            <img src="https://images.unsplash.com/photo-1518611012118-696072aa579a?q=80&w=2070&auto=format&fit=crop" 
+                 alt="Pilates Pose" 
+                 class="w-full h-full object-cover opacity-40 hero-bg scale-105 transform origin-center">
+            <div class="absolute inset-0 bg-gradient-to-b from-dark/30 via-transparent to-dark"></div>
+        </div>
+
+        <div class="relative z-10 text-center flex flex-col items-center mt-12">
+            <div class="text-xs tracking-[0.3em] text-gold mb-6 font-sans clip-wrap uppercase">
+                <div class="clip-text hero-elem">頂級體態管理 Premium Posture</div>
+            </div>
+            
+            <h1 class="font-serif text-5xl md:text-8xl lg:text-9xl leading-none mb-6 font-light">
+                <div class="clip-wrap"><div class="clip-text hero-elem">Sculpting</div></div>
+                <div class="clip-wrap"><div class="clip-text hero-elem italic text-gold">Auras & Forms</div></div>
+            </h1>
+            
+            <p class="font-sans font-light text-sm md:text-base max-w-md opacity-80 mb-12 clip-wrap">
+                <div class="clip-text hero-elem">結合嬋柔、皮拉提斯與芭蕾雕塑。<br>解放脊椎，精準發力，重塑您優雅挺拔的身姿。</div>
+            </p>
+        </div>
+
+        <!-- Scroll Indicator -->
+        <div class="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-60">
+            <span class="text-[10px] tracking-widest uppercase font-sans">向下滑動 Scroll</span>
+            <div class="w-[1px] h-12 bg-gradient-to-b from-sand to-transparent"></div>
+        </div>
+    </header>
+
+    <!-- Infinite Marquee Section -->
+    <section class="relative z-10 bg-dark py-10">
+        <div class="marquee-container font-serif text-4xl md:text-6xl italic font-light text-sand/40">
+            <div class="marquee-content">
+                GYROKINESIS<span class="text-gold mx-8">✦</span>PILATES<span class="text-gold mx-8">✦</span>BARRE SCULPT<span class="text-gold mx-8">✦</span>GYROKINESIS<span class="text-gold mx-8">✦</span>PILATES<span class="text-gold mx-8">✦</span>BARRE SCULPT<span class="text-gold mx-8">✦</span>
+            </div>
+            <div class="marquee-content" aria-hidden="true">
+                GYROKINESIS<span class="text-gold mx-8">✦</span>PILATES<span class="text-gold mx-8">✦</span>BARRE SCULPT<span class="text-gold mx-8">✦</span>GYROKINESIS<span class="text-gold mx-8">✦</span>PILATES<span class="text-gold mx-8">✦</span>BARRE SCULPT<span class="text-gold mx-8">✦</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Value Propositions (3 Columns) -->
+    <section id="about" class="relative z-10 py-32 px-6 md:px-12 max-w-7xl mx-auto">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
+            
+            <!-- Item 1 -->
+            <div class="glass p-8 rounded-3xl flex flex-col gap-6 value-card opacity-0 translate-y-10">
+                <div class="flex justify-between items-start">
+                    <span class="font-serif italic text-gold text-2xl">01</span>
+                    <iconify-icon icon="solar:infinity-linear" class="text-4xl opacity-50"></iconify-icon>
+                </div>
+                <div>
+                    <h3 class="font-serif text-3xl mb-2">流暢 <span class="text-xl italic opacity-60">Fluidity.</span></h3>
+                    <h4 class="font-sans text-sm tracking-widest uppercase text-gold mb-4">嬋柔 Gyrokinesis</h4>
+                    <p class="font-sans text-sm opacity-70 leading-relaxed font-light">
+                        透過三維空間的螺旋與波動，解放僵硬脊椎，喚醒深層筋膜，找回身體最原始的流暢與呼吸。
+                    </p>
+                </div>
+            </div>
+
+            <!-- Item 2 -->
+            <div class="glass p-8 rounded-3xl flex flex-col gap-6 value-card opacity-0 translate-y-10 md:mt-12">
+                <div class="flex justify-between items-start">
+                    <span class="font-serif italic text-gold text-2xl">02</span>
+                    <iconify-icon icon="solar:target-linear" class="text-4xl opacity-50"></iconify-icon>
+                </div>
+                <div>
+                    <h3 class="font-serif text-3xl mb-2">控制 <span class="text-xl italic opacity-60">Control.</span></h3>
+                    <h4 class="font-sans text-sm tracking-widest uppercase text-gold mb-4">皮拉提斯 Pilates</h4>
+                    <p class="font-sans text-sm opacity-70 leading-relaxed font-light">
+                        強勢介入核心控制，精準鍛鍊每一束肌肉。強化骨盆底肌群與脊椎穩定，建立不可摧毀的身體基石。
+                    </p>
+                </div>
+            </div>
+
+            <!-- Item 3 -->
+            <div class="glass p-8 rounded-3xl flex flex-col gap-6 value-card opacity-0 translate-y-10 md:mt-24">
+                <div class="flex justify-between items-start">
+                    <span class="font-serif italic text-gold text-2xl">03</span>
+                    <iconify-icon icon="solar:star-fall-linear" class="text-4xl opacity-50"></iconify-icon>
+                </div>
+                <div>
+                    <h3 class="font-serif text-3xl mb-2">優雅 <span class="text-xl italic opacity-60">Elegance.</span></h3>
+                    <h4 class="font-sans text-sm tracking-widest uppercase text-gold mb-4">芭蕾雕塑 Barre</h4>
+                    <p class="font-sans text-sm opacity-70 leading-relaxed font-light">
+                        結合芭蕾把杆與微小範圍高次數的阻力訓練。延伸肌肉線條，燃燒脂肪，雕塑出修長且充滿力量的藝術體態。
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Instructor Bio Section -->
+    <section id="instructor" class="relative z-10 py-32 bg-dark">
+        <div class="max-w-7xl mx-auto px-6 md:px-12 flex flex-col md:flex-row-reverse gap-16 items-center">
+            
+            <div class="w-full md:w-1/2">
+                <div class="clip-wrap mb-4">
+                    <h2 class="font-serif text-5xl md:text-7xl section-title clip-text">創辦人<br><span class="text-4xl italic text-gold">Our Instructor.</span></h2>
+                </div>
+                
+                <div class="text-reveal mb-8">
+                    <h3 class="font-serif text-4xl mb-2 text-sand">Elin</h3>
+                    <p class="font-sans text-sm tracking-widest uppercase text-gold opacity-80">表演藝術工作者 / 資深體態指導</p>
+                </div>
+
+                <p class="font-sans font-light opacity-80 max-w-md leading-relaxed mb-10 text-reveal">
+                    畢業於國立台北藝術大學舞蹈系。<br><br>
+                    Elin老師教學經驗與舞台表演經驗多年。因對身體濃厚的興趣與熱愛，持續鑽研各種舞蹈與身體訓練系統，致力於引導學員找回身體的覺知與力量。
+                </p>
+                
+                <div class="flex flex-col gap-4 border-l-2 border-gold/30 pl-6 text-reveal">
+                    <h4 class="font-sans text-sm tracking-widest uppercase opacity-60 mb-2 text-gold">專業認證 Certifications</h4>
+                    <ul class="font-serif text-lg space-y-3 opacity-90">
+                        <li>GYROKINESIS Ⓡ Certified</li>
+                        <li>GYROTONIC Ⓡ Foundation Trainer</li>
+                        <li>PBT Level 1 Certified</li>
+                        <li>大中華運動健身暨證照協會</li>
+                        <li>Barre芭蕾雕塑師資認證</li>
+                        <li>體適能C級證照</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="w-full md:w-1/2 relative h-[700px] rounded-3xl overflow-hidden glass p-2 parallax-container">
+                <img src="https://i.ibb.co/20jxMx77/IMG-3882.jpg" alt="Elin Instructor Pose" class="w-full h-full object-cover rounded-2xl img-reveal transform scale-125" style="object-position: center 30%;">
+                <div class="absolute inset-0 bg-dark/20 rounded-2xl"></div>
+            </div>
+            
+        </div>
+    </section>
+
+    <!-- Global Partners / As seen in -->
+    <section class="relative z-10 py-20 border-y border-white/5 bg-dark/80">
+        <div class="max-w-5xl mx-auto px-6 text-center">
+            <p class="font-sans text-xs tracking-[0.2em] text-gold/80 mb-10 uppercase">合作與靈感啟發 Recognized & Inspired By</p>
+            <div class="flex flex-wrap justify-center items-center gap-12 md:gap-24 opacity-50 grayscale">
+                <iconify-icon icon="simple-icons:lululemon" class="text-4xl hover:opacity-100 hover:grayscale-0 transition-all duration-500"></iconify-icon>
+                <iconify-icon icon="simple-icons:vogue" class="text-6xl hover:opacity-100 hover:grayscale-0 transition-all duration-500"></iconify-icon>
+                <iconify-icon icon="simple-icons:peloton" class="text-4xl hover:opacity-100 hover:grayscale-0 transition-all duration-500"></iconify-icon>
+                <iconify-icon icon="simple-icons:gq" class="text-5xl hover:opacity-100 hover:grayscale-0 transition-all duration-500"></iconify-icon>
+                <iconify-icon icon="simple-icons:strava" class="text-4xl hover:opacity-100 hover:grayscale-0 transition-all duration-500"></iconify-icon>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer / CTA -->
+    <footer class="relative z-10 pt-32 pb-12 px-6 flex flex-col items-center justify-center overflow-hidden">
+        <!-- Huge Background Text -->
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[12vw] font-serif font-bold opacity-5 pointer-events-none whitespace-nowrap z-0">
+            THE SOMA STUDIO
+        </div>
+
+        <div class="relative z-10 text-center flex flex-col items-center">
+            <iconify-icon icon="solar:moon-stars-linear" class="text-5xl text-gold mb-6"></iconify-icon>
+            <h2 class="font-serif text-5xl md:text-7xl mb-6">開啟蛻變之旅<br><span class="text-4xl italic text-gold">Begin Your Transformation.</span></h2>
+            <p class="font-sans font-light opacity-80 mb-12 max-w-sm">
+                立即聯繫您的專屬體態評估，啟動由內而外的美學蛻變之旅。
+            </p>
+            
+            <a href="<?= appUrl ?>?page=booking" target="_top" class="glass-btn px-10 py-4 rounded-full text-sm tracking-[0.1em] flex items-center gap-3 group relative overflow-hidden inline-flex">
+                <span class="relative z-10 uppercase">進入預約系統 Book Now</span>
+                <iconify-icon icon="solar:arrow-right-linear" class="relative z-10 group-hover:translate-x-1 transition-transform"></iconify-icon>
+                <div class="absolute inset-0 bg-gold/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out z-0"></div>
+            </a>
+        </div>
+
+        <div class="relative z-10 mt-32 w-full max-w-7xl border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs font-sans opacity-60 uppercase tracking-widest">
+            <p>&copy; 2026 THE SOMA STUDIO.</p>
+            <div class="flex gap-6">
+                <a href="#" class="hover:text-gold transition-colors">Instagram</a>
+                <a href="<?= appUrl ?>?page=booking" target="_top" class="hover:text-gold transition-colors">LINE 官方帳號</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts: GSAP & Anime.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <script>
+        // Register GSAP plugins
+        gsap.registerPlugin(ScrollTrigger);
+
+        // 1. Custom Cursor & Flashlight Halo Logic
+        const cursorDot = document.getElementById('cursor-dot');
+        const cursorHalo = document.getElementById('cursor-halo');
+        
+        // Use GSAP quickTo for smooth performant cursor tracking
+        let xToDot = gsap.quickTo(cursorDot, "left", {duration: 0.1, ease: "power3"});
+        let yToDot = gsap.quickTo(cursorDot, "top", {duration: 0.1, ease: "power3"});
+        let xToHalo = gsap.quickTo(cursorHalo, "left", {duration: 0.6, ease: "power3"});
+        let yToHalo = gsap.quickTo(cursorHalo, "top", {duration: 0.6, ease: "power3"});
+
+        window.addEventListener("mousemove", (e) => {
+            xToDot(e.clientX);
+            yToDot(e.clientY);
+            xToHalo(e.clientX);
+            yToHalo(e.clientY);
+        });
+
+        // Hover effect for buttons & links
+        const interactables = document.querySelectorAll('button, a, .cursor-pointer');
+        interactables.forEach(el => {
+            el.addEventListener('mouseenter', () => {
+                gsap.to(cursorDot, {scale: 3, backgroundColor: '#C8A97E', duration: 0.3});
+            });
+            el.addEventListener('mouseleave', () => {
+                gsap.to(cursorDot, {scale: 1, backgroundColor: '#EAE0D5', duration: 0.3});
+            });
+        });
+
+        // 2. Hero Section Load Animation
+        const heroTl = gsap.timeline({ defaults: { ease: "power4.out" } });
+        heroTl.to(".hero-elem", {
+            y: "0%",
+            duration: 1.5,
+            stagger: 0.15,
+            delay: 0.2
+        }).fromTo(".hero-bg", 
+            { scale: 1.1, opacity: 0 },
+            { scale: 1.05, opacity: 0.4, duration: 2.5, ease: "power2.out" },
+            "-=1.5"
+        );
+
+        // 4. Value Cards Scroll Animation
+        gsap.utils.toArray('.value-card').forEach((card, i) => {
+            gsap.to(card, {
+                scrollTrigger: {
+                    trigger: card,
+                    start: "top 85%",
+                },
+                y: 0,
+                opacity: 1,
+                duration: 1.2,
+                ease: "power3.out"
+            });
+        });
+
+        // 5. Instructor Section Image & Text Reveal
+        const spaceTl = gsap.timeline({
+            scrollTrigger: {
+                trigger: "#instructor",
+                start: "top 70%",
+            }
+        });
+
+        spaceTl.to(".section-title", {
+            y: "0%", duration: 1.2, ease: "power4.out"
+        })
+        .fromTo(".text-reveal", 
+            { y: 30, opacity: 0 }, 
+            { y: 0, opacity: 1, duration: 1, stagger: 0.1 }, 
+            "-=0.8"
+        )
+        .to(".img-reveal", {
+            clipPath: "polygon(0 0, 100% 0, 100% 100%, 0 100%)",
+            duration: 1.5,
+            ease: "power4.inOut"
+        }, "-=1.2");
+
+        // Image Parallax Effect
+        gsap.to(".img-reveal", {
+            scrollTrigger: {
+                trigger: ".parallax-container",
+                start: "top bottom",
+                end: "bottom top",
+                scrub: true
+            },
+            scale: 1,
+            ease: "none"
+        });
+    </script>
+</body>
+</html>
