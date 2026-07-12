@@ -38,16 +38,23 @@
     
     .profile-header { display: flex; align-items: center; margin-bottom: 24px; }
     .profile-pic { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid var(--secondary); margin-right: 16px; }
-    .profile-name { font-size: 20px; font-weight: bold; }
+    .profile-name { font-size: 19px; font-weight: bold; }
     
     .points-box { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 24px; }
     .point-card { flex: 1; background: var(--secondary); padding: 16px; border-radius: 12px; text-align: center; }
     .point-card span { display: block; font-size: 14px; margin-bottom: 4px; }
     .point-card strong { font-size: 28px; color: var(--accent); }
-    .expiry-date { text-align: center; font-size: 12px; color: #888; margin-top: -10px; margin-bottom: 24px; }
+    .expiry-date { text-align: center; font-size: 13px; color: #888; margin-top: -10px; margin-bottom: 24px; font-weight: 500; }
     
+    /* 摺疊明細專用樣式 */
     .log-list { border-top: 1px solid var(--secondary); padding-top: 16px; }
-    .log-item { background: var(--bg-color); padding: 12px; border-radius: 8px; margin-bottom: 12px; font-size: 14px; }
+    .log-group { margin-bottom: 14px; }
+    .log-group summary { background: var(--secondary); padding: 8px 12px; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; user-select: none; }
+    .log-group summary::-webkit-details-marker { display: none; }
+    .log-group summary:active { opacity: 0.8; }
+    .log-group-content { padding-top: 8px; }
+    
+    .log-item { background: var(--bg-color); padding: 12px; border-radius: 8px; margin-bottom: 8px; font-size: 14px; }
     .log-header { display: flex; justify-content: space-between; margin-bottom: 6px; color: #888; font-size: 12px; }
     .log-title { font-weight: bold; color: var(--primary); }
     .log-message { margin-top: 6px; padding-top: 6px; border-top: 1px dashed var(--secondary); font-style: italic; color: var(--text-dark); }
@@ -93,6 +100,7 @@
   <div id="dashboard-view" class="container hidden">
     <div class="profile-header">
       <img id="user-pic" class="profile-pic" src="" alt="大頭照">
+      <!-- 已移除年齡顯示，畫面更加俐落 -->
       <div id="user-name" class="profile-name">載入中...</div>
     </div>
     
@@ -100,6 +108,7 @@
       <div class="point-card"><span>器械點數</span><strong id="apparatus-pts">0</strong></div>
       <div class="point-card"><span>墊上點數</span><strong id="mat-pts">0</strong></div>
     </div>
+    <!-- 點數到期日顯示容器 -->
     <div class="expiry-date" id="expiry-date">到期日：-</div>
     
     <h3>使用明細</h3>
@@ -114,7 +123,7 @@
 
     let liffProfile = null;
 
-    // 前端日期強效淨化器：消滅所有 T 與 Z
+    // 前端日期強效淨化器
     function cleanDateString(dateStr) {
       if (!dateStr || dateStr === "-" || dateStr === "尚未設定") return dateStr || "";
       const d = new Date(dateStr);
@@ -122,15 +131,6 @@
       const yyyy = d.getFullYear(), mm = String(d.getMonth() + 1).padStart(2, '0'), dd = String(d.getDate()).padStart(2, '0');
       const hh = String(d.getHours()).padStart(2, '0'), min = String(d.getMinutes()).padStart(2, '0'), ss = String(d.getSeconds()).padStart(2, '0');
       return (hh==='00' && min==='00' && ss==='00') ? `${yyyy}-${mm}-${dd}` : `${yyyy}-${mm}-${dd} ${hh}:${min}:${ss}`;
-    }
-
-    function calculateAge(birthdayStr) {
-      if (!birthdayStr) return "?";
-      const birthDate = new Date(birthdayStr); if(isNaN(birthDate.getTime())) return "?";
-      const today = new Date(); let age = today.getFullYear() - birthDate.getFullYear();
-      const m = today.getMonth() - birthDate.getMonth();
-      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
-      return age;
     }
 
     function initBirthdayDropdowns() {
@@ -185,13 +185,15 @@
       document.getElementById('dashboard-view').classList.remove('hidden');
       document.getElementById('user-pic').src = profile.avatar || "https://via.placeholder.com/60";
       
-      const ageStr = calculateAge(profile.birthday);
-      document.getElementById('user-name').innerText = `${profile.name} (${profile.nickname}, ${ageStr}歲)`;
+      // 取消年齡顯示，保持畫面俐落
+      document.getElementById('user-name').innerText = `${profile.name} (${profile.nickname})`;
       document.getElementById('apparatus-pts').innerText = profile.apparatusPoints;
       document.getElementById('mat-pts').innerText = profile.matPoints;
       
-      // 套用強效日期淨化器
-      document.getElementById('expiry-date').innerText = "點數到期日：" + (cleanDateString(profile.expiryDate) || "尚未設定");
+      // 擷取到期日的純日期部分 (去掉時間)
+      const rawExpiry = cleanDateString(profile.expiryDate);
+      const displayExpiry = rawExpiry ? rawExpiry.split(' ')[0] : "尚未設定";
+      document.getElementById('expiry-date').innerText = "點數到期日：" + displayExpiry;
 
       const logContainer = document.getElementById('log-container'); logContainer.innerHTML = ""; 
       if (logs.length === 0) { logContainer.innerHTML = "<p style='text-align:center; color:#888;'>目前還沒有異動紀錄喔！</p>"; return; }
@@ -206,13 +208,33 @@
       });
 
       for (const dateKey in groupedLogs) {
-        logContainer.innerHTML += `<div style="background:var(--secondary); color:var(--text-dark); padding:4px 10px; border-radius:6px; font-weight:bold; font-size:13px; margin:14px 0 8px 0;">📅 ${dateKey}</div>`;
+        const logsForThisDate = groupedLogs[dateKey];
+        // 使用 HTML5 details 與 summary 製作可收合抽屜，並標示筆數
+        let groupHtml = `
+          <details class="log-group" open>
+            <summary>
+              <span>📅 ${dateKey}</span>
+              <span style="font-size:12px; color:#888; font-weight:normal;">共 ${logsForThisDate.length} 筆 ▾</span>
+            </summary>
+            <div class="log-group-content">
+        `;
         
-        groupedLogs[dateKey].forEach(log => {
+        logsForThisDate.forEach(log => {
           let sign = log.pointsChange > 0 ? "+" : ""; let color = log.pointsChange > 0 ? "#6E8573" : "#A95A4E"; 
-          let itemHtml = `<div class="log-item"><div class="log-header"><span>⏳ 時間：${log.timePart || dateKey}</span><span style="color:${color}; font-size:14px; font-weight:bold;">${sign}${log.pointsChange} 點</span></div><div class="log-title">項目：${log.courseType}點數 (${log.note || "無內部備註"})</div>${log.teacherMessage ? `<div class="log-message">💬 給你的話：${log.teacherMessage}</div>` : ""}</div>`;
-          logContainer.innerHTML += itemHtml;
+          groupHtml += `
+            <div class="log-item">
+              <div class="log-header">
+                <span>⏳ 時間：${log.timePart || dateKey}</span>
+                <span style="color:${color}; font-size:14px; font-weight:bold;">${sign}${log.pointsChange} 點</span>
+              </div>
+              <div class="log-title">項目：${log.courseType}點數 (${log.note || "無內部備註"})</div>
+              ${log.teacherMessage ? `<div class="log-message">💬 給你的話：${log.teacherMessage}</div>` : ""}
+            </div>
+          `;
         });
+        
+        groupHtml += `</div></details>`;
+        logContainer.innerHTML += groupHtml;
       }
     }
 
