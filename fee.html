@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="scroll-smooth">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>THE SOMA STUDIO | 專屬方案與報名</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        serif: ['"Cormorant Garamond"', 'serif'],
+                        sans: ['"Noto Sans TC"', 'Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        dark: '#362F2C',
+                        sand: '#F7F2EB',
+                        gold: '#DFCAAB',
+                        burgundy: '#732C40'
+                    }
+                }
+            }
+        }
+  </script>
+
+  <!-- Iconify -->
+  <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+
+  <style>
+    body {
+      background-color: #362F2C;
+      color: #F7F2EB;
+      cursor: default;
+      overflow-x: hidden;
+      font-family: 'Noto Sans TC', sans-serif;
+    }
+
+    .noise-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      pointer-events: none; z-index: 50; opacity: 0.03;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    }
+
+    .clip-text { clip-path: polygon(0 100%, 100% 100%, 100% 100%, 0 100%); }
+
+    .beam-box {
+      position: relative; background: rgba(255, 255, 255, 0.06);
+      border-radius: 1.5rem; backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .glass-btn {
+      background: rgba(223, 202, 171, 0.15); backdrop-filter: blur(8px);
+      border: 1px solid rgba(223, 202, 171, 0.6); transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .glass-btn:hover {
+      background: rgba(223, 202, 171, 0.3); border: 1px solid rgba(223, 202, 171, 1); transform: translateY(-2px);
+    }
+
+    .form-input {
+      width: 100%; background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(223, 202, 171, 0.5);
+      border-radius: 0.75rem; padding: 12px 16px; color: #F7F2EB; outline: none; transition: all 0.3s;
+    }
+    .form-input:focus { border-color: #DFCAAB; background: rgba(255, 255, 255, 0.2); }
+    .form-input::placeholder { color: rgba(247, 242, 235, 0.5); }
+    select.form-input option, select.form-input optgroup { background-color: #362F2C; color: #DFCAAB; }
+
+    .check-label {
+      display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 10px;
+      border: 1px solid rgba(223, 202, 171, 0.4); border-radius: 0.5rem; transition: all 0.2s;
+    }
+    .check-label:has(input:checked) { background: rgba(223, 202, 171, 0.25); border-color: #DFCAAB; }
+    input[type="checkbox"], input[type="radio"] { accent-color: #DFCAAB; width: 16px; height: 16px; }
+
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+
+  <script>
+    var HOME_URL = '<?= typeof appUrl !== "undefined" ? appUrl : "" ?>'; 
+  </script>
+</head>
+
+<body class="antialiased selection:bg-gold selection:text-dark pb-20">
+
+  <div class="noise-overlay"></div>
+
+  <!-- Toast 提示框 -->
+  <div id="toast" class="fixed bottom-10 left-1/2 transform -translate-x-1/2 bg-gold text-dark px-6 py-3 rounded-full shadow-2xl transition-all duration-300 opacity-0 translate-y-4 pointer-events-none z-[99999] text-sm font-bold tracking-wider"></div>
+
+  <!-- 頂部導覽 (★ 新增 LINE 官方客服按鈕) -->
+  <nav class="fixed top-0 left-0 w-full z-40 px-5 py-4 flex justify-between items-center backdrop-blur-md bg-dark/85 border-b border-white/10">
+      <a href="#" onclick="window.top.location.href = HOME_URL; return false;" class="font-serif text-lg tracking-widest text-gold flex items-center gap-2 font-bold">
+          <iconify-icon icon="ph:arrow-left-bold"></iconify-icon> 返回首頁
+      </a>
+      <a href="https://lin.ee/7fCJor9" target="_top" class="flex items-center gap-1.5 bg-[#06C755]/10 border border-[#06C755]/30 px-3 py-1.5 rounded-full text-[#06C755] hover:bg-[#06C755]/20 transition-colors shadow-sm">
+          <iconify-icon icon="simple-icons:line" class="text-sm"></iconify-icon>
+          <span class="text-[10px] font-bold tracking-widest uppercase">官方客服</span>
+      </a>
+  </nav>
+
+  <main class="min-h-screen pt-24 px-4 md:px-12 max-w-6xl mx-auto flex flex-col items-center w-full">
+
+    <!-- ========================================== -->
+    <!-- VIEW 1: 主選單 (方案列表) -->
+    <!-- ========================================== -->
+    <div id="view-main" class="w-full flex flex-col items-center fade-up hidden">
+        <header class="text-center mb-10 w-full">
+          <h1 class="font-serif text-4xl md:text-5xl mb-2 font-light text-gold">Investment in <span class="italic text-sand font-medium">Yourself.</span></h1>
+          <p class="font-sans font-medium opacity-90 text-xs tracking-widest uppercase">專屬美學方案 Pricing Plans</p>
+        </header>
+
+        <div class="w-full max-w-5xl grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+          
+          <!-- 器械課程 Card -->
+          <div class="beam-box p-6 flex flex-col relative overflow-hidden cursor-pointer hover:-translate-y-1 transition-transform" onclick="navTo('eq_detail')">
+            <div class="absolute top-4 -right-10 bg-gold/30 text-gold text-[10px] font-bold tracking-widest py-1 px-10 rotate-45 border-y border-gold/50 backdrop-blur-md z-10">RECOMMEND</div>
+            <div class="mb-4 flex justify-between items-center">
+              <h3 class="font-serif text-2xl text-gold font-bold">器械課程</h3>
+              <span class="font-sans text-[10px] tracking-widest opacity-80 uppercase border border-white/30 rounded-full px-2.5 py-1">60 Mins</span>
+            </div>
+            <div class="space-y-4 pt-4 border-t border-white/20 flex-grow">
+              <div class="flex justify-between items-end">
+                  <span class="text-sm opacity-100 font-medium">單堂體驗</span>
+                  <div class="text-right">
+                      <span class="text-[10px] opacity-80 line-through mr-2 font-sans">NT$ 1,500</span>
+                      <span class="font-serif text-lg text-sand font-bold">NT$ 1,000</span>
+                  </div>
+              </div>
+              <div class="flex justify-between items-end">
+                  <span class="text-sm opacity-100 font-medium">一期 10 堂</span>
+                  <div class="text-right">
+                      <span class="text-[10px] opacity-80 line-through mr-2 font-sans">NT$ 22,000</span>
+                      <span class="font-serif text-lg text-gold font-bold">NT$ 15,000</span>
+                  </div>
+              </div>
+            </div>
+            <button class="mt-6 w-full py-3 border border-gold/60 rounded-xl text-gold text-sm font-bold tracking-widest hover:bg-gold/20 transition-colors flex justify-center items-center gap-2">
+                詳細介紹與報名 <iconify-icon icon="ph:arrow-right-bold"></iconify-icon>
+            </button>
+          </div>
+
+          <!-- 墊上課程 Card -->
+          <div class="beam-box p-6 flex flex-col cursor-pointer hover:-translate-y-1 transition-transform" onclick="navTo('mat_detail')">
+            <div class="mb-4 flex justify-between items-center">
+              <h3 class="font-serif text-2xl text-gold font-bold">墊上課程</h3>
+              <span class="font-sans text-[10px] tracking-widest opacity-80 uppercase border border-white/30 rounded-full px-2.5 py-1">60 Mins</span>
+            </div>
+            <div class="space-y-4 pt-4 border-t border-white/20 flex-grow">
+              <div class="flex justify-between items-end">
+                  <span class="text-sm opacity-100 font-medium">單堂體驗</span>
+                  <span class="font-serif text-lg text-sand font-bold">NT$ 750</span>
+              </div>
+              <div class="flex justify-between items-end">
+                  <span class="text-sm opacity-100 font-medium">一期 8 堂</span>
+                  <div class="text-right">
+                      <span class="text-[10px] opacity-80 line-through mr-2 font-sans">NT$ 9,900</span>
+                      <span class="font-serif text-lg text-gold font-bold">NT$ 8,800</span>
+                  </div>
+              </div>
+            </div>
+            <button class="mt-6 w-full py-3 border border-gold/60 rounded-xl text-gold text-sm font-bold tracking-widest hover:bg-gold/20 transition-colors flex justify-center items-center gap-2">
+                詳細介紹與報名 <iconify-icon icon="ph:arrow-right-bold"></iconify-icon>
+            </button>
+          </div>
+
+          <!-- 其他團課 Card -->
+          <div class="beam-box p-6 flex flex-col cursor-pointer hover:-translate-y-1 transition-transform" onclick="window.top.location.href='https://lin.ee/7fCJor9'">
+            <div class="mb-4 flex justify-between items-center">
+              <h3 class="font-serif text-2xl text-gold font-bold">其他團課</h3>
+              <iconify-icon icon="solar:users-group-rounded-bold" class="text-2xl opacity-80"></iconify-icon>
+            </div>
+            <div class="space-y-4 pt-4 border-t border-white/20 flex-grow">
+              <div class="flex justify-between items-end">
+                  <span class="text-sm opacity-100 font-medium block">企業及私人包班<br><span class="text-[10px] opacity-80 font-normal">一期 / 10堂</span></span>
+                  <div class="text-right">
+                      <span class="text-[10px] opacity-80 line-through block mb-0.5 font-sans">NT$ 18,000</span>
+                      <span class="font-serif text-lg text-gold font-bold">NT$ 15,000</span>
+                  </div>
+              </div>
+              <p class="text-[11px] opacity-90 leading-relaxed mt-2 text-justify">
+                客製化團體指導，適合企業福委會或親友包班，兩人即可開班。
+              </p>
+            </div>
+            <button class="mt-6 w-full py-3 border border-gold/60 rounded-xl text-gold text-sm font-bold tracking-widest hover:bg-gold/20 transition-colors flex justify-center items-center gap-2">
+                專人聯繫報價 <iconify-icon icon="ph:arrow-right-bold"></iconify-icon>
+            </button>
+          </div>
+
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- VIEW 2: 器械課程 介紹頁 -->
+    <!-- ========================================== -->
+    <div id="view-eq_detail" class="w-full max-w-2xl flex flex-col fade-up hidden">
+        <button onclick="navTo('main')" class="self-start mb-6 text-sm text-gold opacity-100 font-bold flex items-center gap-1"><iconify-icon icon="ph:arrow-left-bold"></iconify-icon> 返回方案列表</button>
+        <h2 class="text-3xl font-serif text-gold mb-2 font-bold">器械課程 Pilates Equipment</h2>
+        <p class="text-sm opacity-90 mb-8 tracking-wide font-medium">精準控制，重塑深層核心力量。</p>
+        
+        <div class="beam-box p-6 space-y-6 text-sm leading-relaxed opacity-100 mb-8">
+            <div>
+                <h4 class="text-gold font-bold text-base mb-2 flex items-center gap-2"><iconify-icon icon="ph:clock-bold"></iconify-icon> 課程效期 (首次上課起算)</h4>
+                <ul class="list-disc pl-5 space-y-1 opacity-95">
+                    <li>「一期10堂課程」有效期限 4 個月，逾期不退費。</li>
+                    <li>「單堂體驗課」有效期限 2 個月，逾期不退費。</li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="text-gold font-bold text-base mb-2 flex items-center gap-2"><iconify-icon icon="ph:calendar-x-bold"></iconify-icon> 取消與更改規範</h4>
+                <ul class="list-disc pl-5 space-y-1 opacity-95">
+                    <li>需取消預約者，請於「課前12小時以上」至官方line提前告知取消。</li>
+                    <li>需更改日期「請完成取消」後於系統重新預約。</li>
+                    <li>因特殊狀況需暫停並延期課程，請至官方line提前告知。</li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="text-gold font-bold text-base mb-2 flex items-center gap-2"><iconify-icon icon="ph:wallet-bold"></iconify-icon> 收費方案 (含場地與器械)</h4>
+                <div class="bg-white/10 p-4 rounded-lg border border-white/20 mt-2 space-y-3">
+                    <div class="flex justify-between items-center"><span class="opacity-100 font-medium">方案 1：單堂體驗價</span>
+                        <div class="text-right">
+                            <span class="text-xs opacity-80 line-through mr-2 font-sans">$1,500</span>
+                            <span class="text-gold font-bold font-serif text-lg">$1,000 / hr</span>
+                        </div>
+                    </div>
+                    <div class="w-full h-px bg-white/20"></div>
+                    <div class="flex justify-between items-center"><span class="opacity-100 font-medium">方案 2：一期 10 堂 ($1,500/hr)</span>
+                        <div class="text-right">
+                            <span class="text-xs opacity-80 line-through mr-2 font-sans">$22,000</span>
+                            <span class="text-gold font-bold font-serif text-lg">$15,000</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-burgundy/40 border border-burgundy/60 p-4 rounded-lg">
+                <h4 class="text-sand font-bold text-sm mb-2">💰 匯款資訊</h4>
+                <p class="text-xs opacity-100 mb-2 font-medium">報名後請於12小時內匯款至指定帳戶，若無匯款視同放棄：</p>
+                <div class="font-mono text-gold text-sm space-y-1 font-bold">
+                    <p>戶名: 翁琳伶</p>
+                    <p>銀行代碼: 822 (中國信託)</p>
+                    <p class="flex items-center">銀行帳號: 510540892679 <button onclick="copyToClipboard('510540892679')" class="ml-2 bg-white/20 px-2 py-0.5 rounded text-[10px] hover:bg-white/30 transition inline-flex items-center text-white"><iconify-icon icon="ph:copy-bold" class="mr-1"></iconify-icon>複製帳號</button></p>
+                </div>
+            </div>
+        </div>
+
+        <button onclick="navTo('eq_signup')" class="w-full bg-gold text-dark font-bold py-4 rounded-xl text-lg tracking-widest shadow-[0_0_15px_rgba(223,202,171,0.5)] hover:scale-[1.02] transition-transform">
+            我已了解，前往填寫報名表
+        </button>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- VIEW 3: 墊上課程 介紹頁 -->
+    <!-- ========================================== -->
+    <div id="view-mat_detail" class="w-full max-w-2xl flex flex-col fade-up hidden">
+        <button onclick="navTo('main')" class="self-start mb-6 text-sm text-gold opacity-100 font-bold flex items-center gap-1"><iconify-icon icon="ph:arrow-left-bold"></iconify-icon> 返回方案列表</button>
+        <h2 class="text-3xl font-serif text-gold mb-2 font-bold">墊上課程 Mat Pilates & Gyrokinesis</h2>
+        <p class="text-sm opacity-90 mb-8 tracking-wide font-medium">解放脊椎，找回身體最原始的流暢。</p>
+        
+        <div class="beam-box p-6 space-y-6 text-sm leading-relaxed opacity-100 mb-8">
+            <div>
+                <h4 class="text-gold font-bold text-base mb-2 flex items-center gap-2"><iconify-icon icon="ph:clock-bold"></iconify-icon> 課程效期 (首次上課起算)</h4>
+                <ul class="list-disc pl-5 space-y-1 opacity-95">
+                    <li>「一期8堂課程」有效期限 3 個月，逾期不退費。</li>
+                    <li>「單堂體驗課」有效期限 2 個月，逾期不退費。</li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="text-gold font-bold text-base mb-2 flex items-center gap-2"><iconify-icon icon="ph:calendar-x-bold"></iconify-icon> 取消與更改規範</h4>
+                <ul class="list-disc pl-5 space-y-1 opacity-95">
+                    <li>需取消預約者，請於「課前12小時以上」至官方line提前告知取消。</li>
+                    <li>需更改日期「請完成取消」後於系統重新預約。</li>
+                    <li>因特殊狀況需暫停並延期課程，請至官方line提前告知。</li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="text-gold font-bold text-base mb-2 flex items-center gap-2"><iconify-icon icon="ph:wallet-bold"></iconify-icon> 收費方案 (含場地)</h4>
+                <div class="bg-white/10 p-4 rounded-lg border border-white/20 mt-2 space-y-3">
+                    <div class="flex justify-between items-center"><span class="opacity-100 font-medium">方案 1：單堂體驗價</span>
+                        <span class="text-gold font-bold font-serif text-lg">$750 / hr</span>
+                    </div>
+                    <div class="w-full h-px bg-white/20"></div>
+                    <div class="flex justify-between items-center">
+                        <span class="opacity-100 font-medium">方案 2：一期 8 堂 ($1,100/hr)</span>
+                        <div class="text-right">
+                            <span class="text-xs opacity-80 line-through mr-1 font-sans">$9,900</span>
+                            <span class="text-gold font-bold font-serif text-lg block">$8,800</span>
+                            <span class="text-[10px] bg-gold/30 text-gold px-2 py-0.5 rounded mt-1 font-bold inline-block">🎁 報名再加送一堂</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-burgundy/40 border border-burgundy/60 p-4 rounded-lg">
+                <h4 class="text-sand font-bold text-sm mb-2">💰 匯款資訊</h4>
+                <p class="text-xs opacity-100 mb-2 font-medium">報名後請於12小時內匯款至指定帳戶，若無匯款視同放棄：</p>
+                <div class="font-mono text-gold text-sm space-y-1 font-bold">
+                    <p>戶名: 翁琳伶</p>
+                    <p>銀行代碼: 822 (中國信託)</p>
+                    <p class="flex items-center">銀行帳號: 510540892679 <button onclick="copyToClipboard('510540892679')" class="ml-2 bg-white/20 px-2 py-0.5 rounded text-[10px] hover:bg-white/30 transition inline-flex items-center text-white"><iconify-icon icon="ph:copy-bold" class="mr-1"></iconify-icon>複製帳號</button></p>
+                </div>
+            </div>
+        </div>
+
+        <button onclick="navTo('mat_signup')" class="w-full bg-gold text-dark font-bold py-4 rounded-xl text-lg tracking-widest shadow-[0_0_15px_rgba(223,202,171,0.5)] hover:scale-[1.02] transition-transform">
+            我已了解，前往填寫報名表
+        </button>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- VIEW 4: 器械課程 報名表單 -->
+    <!-- ========================================== -->
+    <div id="view-eq_signup" class="w-full max-w-lg flex flex-col fade-up hidden">
+        <button onclick="navTo('eq_detail')" class="self-start mb-4 text-sm text-gold opacity-100 font-bold flex items-center gap-1 hover:opacity-100"><iconify-icon icon="ph:arrow-left-bold"></iconify-icon> 返回介紹</button>
+        <h2 class="text-2xl font-serif text-gold font-bold mb-1 border-b border-white/20 pb-4">器械課程 報名資料</h2>
+        
+        <form id="form-eq" onsubmit="previewForm(event, '器械')" class="space-y-5 mt-4">
+            <div><label class="block text-xs text-gold font-bold mb-1.5 ml-1">真實姓名</label><input type="text" name="name" required class="form-input font-bold" placeholder="請輸入姓名"></div>
+            <div class="grid grid-cols-2 gap-4">
+                <div><label class="block text-xs text-gold font-bold mb-1.5 ml-1">手機號碼</label><input type="tel" name="phone" required class="form-input font-bold" placeholder="09xxxxxxxx"></div>
+                <div><label class="block text-xs text-gold font-bold mb-1.5 ml-1">年齡</label><input type="number" name="age" required class="form-input font-bold" placeholder="請輸入歲數"></div>
+            </div>
+            <div><label class="block text-xs text-gold font-bold mb-1.5 ml-1">LINE 顯示暱稱</label><input type="text" name="line_name" required class="form-input font-bold" placeholder="方便我們核對 LINE 訊息"></div>
+            
+            <div class="border-t border-white/20 pt-4">
+                <label class="block text-xs text-gold font-bold mb-2 ml-1">購買類型</label>
+                <div class="grid grid-cols-2 gap-3 font-medium">
+                    <label class="check-label"><input type="radio" name="plan" value="單堂體驗 ($1,000)" required> 單堂體驗 ($1,000)</label>
+                    <label class="check-label"><input type="radio" name="plan" value="一期10堂 ($15,000)"> 一期 10 堂 ($15,000)</label>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs text-gold font-bold mb-2 ml-1">上課場所選擇</label>
+                <div class="grid grid-cols-1 gap-3 font-medium">
+                    <label class="check-label flex-col items-start"><div class="flex items-center gap-2"><input type="radio" name="location" value="台北教室" required> 台北教室 (AT力場 忠孝)</div><div class="text-[10px] text-white/70 ml-6">台北市大安區忠孝東路四段223巷10弄2號2樓</div></label>
+                    <label class="check-label flex-col items-start"><div class="flex items-center gap-2"><input type="radio" name="location" value="林口教室"> 林口教室 (喜姿嬋柔)</div><div class="text-[10px] text-white/70 ml-6">新北市林口區文化三路一段617巷125號</div></label>
+                </div>
+            </div>
+
+            <div id="time-container-eq">
+                <label class="block text-xs text-gold font-bold mb-1.5 ml-1">希望上課時段 <span class="opacity-80" id="time-hint_eq">(載入中...)</span></label>
+                <input type="text" name="pref_time" id="pref_time_input_eq" class="form-input font-bold" placeholder="例如：平日晚上、假日早上...">
+                <select name="pref_time" id="pref_time_select_eq" class="form-input font-bold hidden" disabled>
+                    <option value="">請選擇時段...</option>
+                </select>
+            </div>
+
+            <div class="border-t border-white/20 pt-4">
+                <label class="block text-xs text-gold font-bold mb-2 ml-1">您的身體需求 (可複選)</label>
+                <div class="grid grid-cols-2 gap-2 text-sm font-medium">
+                    <label class="check-label py-2"><input type="checkbox" name="needs" value="協調提升"> 協調提升</label>
+                    <label class="check-label py-2"><input type="checkbox" name="needs" value="肩頸緊繃"> 肩頸緊繃</label>
+                    <label class="check-label py-2"><input type="checkbox" name="needs" value="呼吸不順"> 呼吸不順</label>
+                    <label class="check-label py-2"><input type="checkbox" name="needs" value="壓力大睡不好"> 壓力大睡不好</label>
+                    <label class="check-label py-2"><input type="checkbox" name="needs" value="柔軟度提升"> 柔軟度提升</label>
+                    <label class="check-label py-2"><input type="checkbox" name="needs" value="其他" onchange="toggleOther(this, 'eq_other_need')"> 其他</label>
+                </div>
+                <input type="text" id="eq_other_need" class="form-input mt-2 hidden text-sm font-bold" placeholder="請填寫其他需求...">
+            </div>
+
+            <div class="border-t border-white/20 pt-4 bg-burgundy/30 p-4 rounded-xl border border-burgundy/50 mt-4">
+                <label class="block text-xs text-sand font-bold mb-1.5">匯款帳號末 5 碼 <span class="text-red-400">*</span></label>
+                <input type="text" name="bank_last5" required class="form-input bg-dark/90 border-burgundy/80 text-gold font-mono font-bold text-lg tracking-widest" placeholder="請輸入末五碼" maxlength="5" pattern="\d{5}">
+                <p class="text-[11px] text-white/80 mt-2 leading-relaxed font-medium">
+                    提醒：報名後請於12小時內匯款至 <span class="text-white font-bold tracking-wider">822 中信 510540892679</span>
+                    <button type="button" onclick="copyToClipboard('510540892679')" class="bg-white/20 px-2 py-0.5 rounded text-[10px] hover:bg-white/30 transition inline-flex items-center ml-1 text-white font-bold"><iconify-icon icon="ph:copy-bold" class="mr-0.5"></iconify-icon>複製</button>
+                    ，若無匯款視同放棄。
+                </p>
+            </div>
+
+            <div class="pt-6">
+                <p class="text-[11px] text-center text-white/80 mb-4 font-medium">按下預覽即代表您同意本工作室收集以上資訊作為排課與聯繫使用。</p>
+                <button type="submit" class="w-full bg-gold text-dark font-bold py-4 rounded-xl text-base tracking-widest shadow-md hover:bg-white transition-colors">確認輸入資料</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- VIEW 5: 墊上課程 報名表單 -->
+    <!-- ========================================== -->
+    <div id="view-mat_signup" class="w-full max-w-lg flex flex-col fade-up hidden">
+        <button onclick="navTo('mat_detail')" class="self-start mb-4 text-sm text-gold opacity-100 font-bold flex items-center gap-1 hover:opacity-100"><iconify-icon icon="ph:arrow-left-bold"></iconify-icon> 返回介紹</button>
+        <h2 class="text-2xl font-serif text-gold font-bold mb-1 border-b border-white/20 pb-4">墊上課程 報名資料</h2>
+        
+        <form id="form-mat" onsubmit="previewForm(event, '墊上')" class="space-y-5 mt-4">
+            <div><label class="block text-xs text-gold font-bold mb-1.5 ml-1">真實姓名</label><input type="text" name="name" required class="form-input font-bold" placeholder="請輸入姓名"></div>
+            <div class="grid grid-cols-2 gap-4">
+                <div><label class="block text-xs text-gold font-bold mb-1.5 ml-1">手機號碼</label><input type="tel" name="phone" required class="form-input font-bold" placeholder="09xxxxxxxx"></div>
+                <div><label class="block text-xs text-gold font-bold mb-1.5 ml-1">年齡</label><input type="number" name="age" required class="form-input font-bold" placeholder="請輸入歲數"></div>
+            </div>
+            <div><label class="block text-xs text-gold font-bold mb-1.5 ml-1">LINE 顯示暱稱</label><input type="text" name="line_name" required class="form-input font-bold" placeholder="方便我們核對 LINE 訊息"></div>
+            
+            <div class="border-t border-white/20 pt-4">
+                <label class="block text-xs text-gold font-bold mb-2 ml-1">購買類型</label>
+                <div class="grid grid-cols-1 gap-3 font-medium">
+                    <label class="check-label"><input type="radio" name="plan" value="單堂體驗 ($750)" required> 單堂體驗 ($750)</label>
+                    <label class="check-label"><input type="radio" name="plan" value="一期 8+1 堂 ($8,800)"> 一期 8 堂 + 贈送1堂 ($8,800)</label>
+                    <label class="check-label"><input type="radio" name="plan" value="企業/私人包班 (請填時段)"> 企業/親友包班 (專人聯繫報價)</label>
+                </div>
+            </div>
+
+            <div id="time-container-mat">
+                <label class="block text-xs text-gold font-bold mb-1.5 ml-1">希望上課時段 <span class="opacity-80" id="time-hint_mat">(載入中...)</span></label>
+                <input type="text" name="pref_time" id="pref_time_input_mat" class="form-input font-bold" placeholder="例如：平日晚上、假日早上...">
+                <select name="pref_time" id="pref_time_select_mat" class="form-input font-bold hidden" disabled>
+                    <option value="">請選擇時段...</option>
+                </select>
+            </div>
+
+            <div class="border-t border-white/20 pt-4">
+                <label class="block text-xs text-gold font-bold mb-2 ml-1">您的身體需求 (可複選)</label>
+                <div class="grid grid-cols-2 gap-2 text-sm font-medium">
+                    <label class="check-label py-2"><input type="checkbox" name="needs" value="肩頸痠痛"> 肩頸痠痛</label>
+                    <label class="check-label py-2"><input type="checkbox" name="needs" value="建立運動習慣"> 建立運動習慣</label>
+                    <label class="check-label py-2"><input type="checkbox" name="needs" value="產後腰痠背痛"> 產後腰痠背痛</label>
+                    <label class="check-label py-2"><input type="checkbox" name="needs" value="提升核心穩定"> 提升核心穩定</label>
+                    <label class="check-label py-2"><input type="checkbox" name="needs" value="心肺呼吸訓練"> 心肺呼吸訓練</label>
+                    <label class="check-label py-2"><input type="checkbox" name="needs" value="提升專項呼吸表現"> 提升專項呼吸表現</label>
+                    <label class="check-label py-2 col-span-2"><input type="checkbox" name="needs" value="其他" onchange="toggleOther(this, 'mat_other_need')"> 其他</label>
+                </div>
+                <input type="text" id="mat_other_need" class="form-input mt-2 hidden text-sm font-bold" placeholder="請填寫其他需求...">
+            </div>
+
+            <div class="border-t border-white/20 pt-4 bg-burgundy/30 p-4 rounded-xl border border-burgundy/50 mt-4">
+                <label class="block text-xs text-sand font-bold mb-1.5">匯款帳號末 5 碼 <span class="text-red-400">*</span></label>
+                <input type="text" name="bank_last5" required class="form-input bg-dark/90 border-burgundy/80 text-gold font-mono font-bold text-lg tracking-widest" placeholder="請輸入末五碼" maxlength="5" pattern="\d{5}">
+                <p class="text-[11px] text-white/80 mt-2 leading-relaxed font-medium">
+                    提醒：報名後請於12小時內匯款至 <span class="text-white font-bold tracking-wider">822 中信 510540892679</span>
+                    <button type="button" onclick="copyToClipboard('510540892679')" class="bg-white/20 px-2 py-0.5 rounded text-[10px] hover:bg-white/30 transition inline-flex items-center ml-1 text-white font-bold"><iconify-icon icon="ph:copy-bold" class="mr-0.5"></iconify-icon>複製</button>
+                    ，若無匯款視同放棄。
+                </p>
+            </div>
+
+            <div class="pt-6">
+                <p class="text-[11px] text-center text-white/80 mb-4 font-medium">按下預覽即代表您同意本工作室收集以上資訊作為排課與聯繫使用。</p>
+                <button type="submit" class="w-full bg-gold text-dark font-bold py-4 rounded-xl text-base tracking-widest shadow-md hover:bg-white transition-colors">確認輸入資料</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- VIEW CONFIRM: 填寫確認頁 -->
+    <!-- ========================================== -->
+    <div id="view-confirm" class="w-full max-w-sm flex flex-col items-center fade-up hidden pb-10">
+        <h2 class="text-2xl font-serif text-sand mb-2 text-center font-bold">請確認報名資料</h2>
+        <p class="text-sm opacity-90 font-medium mb-6 tracking-wide text-center">請仔細核對您填寫的資訊，確認無誤後送出。</p>
+
+        <div class="bg-white/10 border border-white/20 text-sand w-full rounded-2xl p-6 shadow-xl mb-6 relative overflow-hidden">
+            <div class="space-y-4 text-sm font-medium">
+                <div class="flex justify-between border-b border-white/10 pb-2"><span class="opacity-80">課程類型</span><span id="conf-type" class="font-bold text-gold"></span></div>
+                <div class="flex justify-between border-b border-white/10 pb-2"><span class="opacity-80">購買方案</span><span id="conf-plan" class="font-bold text-right pl-4"></span></div>
+                <div class="flex justify-between border-b border-white/10 pb-2"><span class="opacity-80">應繳金額</span><span id="conf-amount" class="font-bold text-red-400 text-base"></span></div>
+                <div class="flex justify-between border-b border-white/10 pb-2"><span class="opacity-80">上課場所</span><span id="conf-loc" class="font-bold text-right pl-4"></span></div>
+                <div class="flex justify-between border-b border-white/10 pb-2"><span class="opacity-80">期望時段</span><span id="conf-time" class="font-bold text-right pl-4"></span></div>
+                <div class="flex flex-col border-b border-white/10 pb-2"><span class="opacity-80 mb-1">身體需求</span><span id="conf-needs" class="font-bold leading-relaxed text-gold text-justify"></span></div>
+                <div class="flex justify-between border-b border-white/10 pb-2"><span class="opacity-80">姓名</span><span id="conf-name" class="font-bold"></span></div>
+                <div class="flex justify-between border-b border-white/10 pb-2"><span class="opacity-80">手機號碼</span><span id="conf-phone" class="font-mono font-bold"></span></div>
+                <div class="flex justify-between border-b border-white/10 pb-2"><span class="opacity-80">LINE暱稱</span><span id="conf-line" class="font-bold"></span></div>
+                <div class="flex justify-between pt-2 items-center"><span class="opacity-80">匯款末5碼</span><span id="conf-bank" class="font-mono font-bold text-burgundy text-lg tracking-widest bg-white/90 px-2 py-0.5 rounded shadow-sm"></span></div>
+            </div>
+        </div>
+
+        <div class="flex flex-col w-full gap-3">
+            <button onclick="confirmSubmit()" class="w-full bg-gold text-dark font-bold py-4 rounded-xl text-base tracking-widest shadow-md hover:bg-white transition-colors" id="btn-final-submit">
+                確認無誤，正式送出
+            </button>
+            <button onclick="navTo(pendingSubmitData.type === '器械' ? 'eq_signup' : 'mat_signup')" class="w-full border border-white/40 text-sand font-bold py-3.5 rounded-xl text-sm hover:bg-white/10 transition-colors">
+                返回修改
+            </button>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- VIEW 6: 截圖總結頁 -->
+    <!-- ========================================== -->
+    <div id="view-summary" class="w-full max-w-sm flex flex-col items-center fade-up hidden pb-10">
+        <h2 class="text-2xl font-serif text-sand mb-2 text-center font-bold">申請已完成</h2>
+        <p class="text-sm opacity-100 font-medium mb-6 tracking-wide text-center leading-relaxed text-gold">請截圖此畫面傳送至官方 LINE，<br>專人確認匯款後即為您開通權限。</p>
+
+        <!-- Receipt Card -->
+        <div class="bg-sand text-dark w-full rounded-2xl p-6 shadow-2xl relative mb-8 border-2 border-gold" id="receipt-card">
+            <!-- Deco -->
+            <div class="absolute -top-3 -right-3 w-16 h-16 bg-gold rounded-full opacity-40 blur-xl"></div>
+            
+            <div class="text-center mb-6 border-b border-dark/10 pb-4 relative z-10">
+                <h3 class="font-serif text-2xl font-bold tracking-widest">THE SOMA</h3>
+                <p class="text-[10px] tracking-widest uppercase mt-1 opacity-80 font-bold">Registration Summary</p>
+            </div>
+
+            <div class="space-y-3 text-sm font-bold relative z-10">
+                <div class="flex justify-between"><span class="opacity-70">課程類型</span><span id="sum-type" class="text-burgundy"></span></div>
+                <div class="flex justify-between"><span class="opacity-70">購買方案</span><span id="sum-plan" class="text-right pl-4"></span></div>
+                <div class="flex justify-between"><span class="opacity-70">應繳金額</span><span id="sum-amount" class="text-red-700 text-lg"></span></div>
+                <div class="w-full h-px bg-dark/10 my-2"></div>
+                <div class="flex justify-between"><span class="opacity-70">姓名</span><span id="sum-name"></span></div>
+                <div class="flex justify-between"><span class="opacity-70">手機號碼</span><span id="sum-phone" class="font-mono"></span></div>
+                <div class="flex justify-between"><span class="opacity-70">LINE暱稱</span><span id="sum-line"></span></div>
+                <div class="flex justify-between pt-2 items-center"><span class="opacity-70">匯款末5碼</span><span id="sum-bank" class="font-mono text-burgundy text-xl tracking-widest"></span></div>
+            </div>
+            
+            <div class="mt-6 pt-4 border-t border-dark/10 text-center relative z-10">
+                <p class="text-xs opacity-80 font-bold">Please screenshot this page.<br><span class="text-burgundy">請將此畫面截圖傳送至官方LINE。</span></p>
+            </div>
+        </div>
+
+        <div class="flex gap-3 w-full">
+            <a href="https://lin.ee/7fCJor9" target="_top" class="flex-1 bg-[#06C755] text-white font-bold py-3.5 rounded-xl text-sm flex justify-center items-center gap-1 shadow-md hover:bg-[#05b34c] transition-colors">
+                <iconify-icon icon="simple-icons:line" class="text-base"></iconify-icon> 前往 LINE
+            </a>
+            <button onclick="navTo('main')" class="flex-1 border border-white/40 text-sand font-bold py-3.5 rounded-xl text-sm hover:bg-white/10 transition-colors">
+                返回課程
+            </button>
+        </div>
+    </div>
+
+  </main>
+
+  <script>
+    // Toast Alert Function
+    var toastTimeout;
+    function showMsg(msg) {
+        var toast = document.getElementById('toast');
+        toast.innerText = msg;
+        toast.classList.remove('opacity-0', 'translate-y-4');
+        clearTimeout(toastTimeout);
+        toastTimeout = setTimeout(function() {
+            toast.classList.add('opacity-0', 'translate-y-4');
+        }, 3000);
+    }
+
+    // Copy to Clipboard Logic
+    function copyToClipboard(text) {
+        var tempInput = document.createElement("input");
+        tempInput.value = text;
+        document.body.appendChild(tempInput);
+        tempInput.select();
+        document.execCommand("copy");
+        document.body.removeChild(tempInput);
+        showMsg('已複製帳號：' + text);
+    }
+
+    // URL Routing Logic
+    const urlParams = new URLSearchParams(window.location.search);
+    const actionParam = urlParams.get('action') || 'main';
+
+    const views = ['main', 'eq_detail', 'mat_detail', 'eq_signup', 'mat_signup', 'confirm', 'summary'];
+    let pendingSubmitData = null;
+
+    function navTo(viewId) {
+        const newUrl = HOME_URL + '?page=fee&action=' + viewId;
+        
+        try {
+            window.history.pushState({path: newUrl}, '', newUrl);
+        } catch(e) {}
+
+        views.forEach(v => {
+            const el = document.getElementById('view-' + v);
+            if(el) el.classList.add('hidden');
+        });
+        const target = document.getElementById('view-' + viewId);
+        if(target) {
+            target.classList.remove('hidden');
+            window.scrollTo({top: 0, behavior: 'smooth'});
+        }
+    }
+
+    if (views.includes(actionParam)) {
+        navTo(actionParam);
+    } else {
+        navTo('main');
+    }
+
+    function toggleOther(checkbox, inputId) {
+        const input = document.getElementById(inputId);
+        if (checkbox.checked) {
+            input.classList.remove('hidden');
+            input.required = true;
+        } else {
+            input.classList.add('hidden');
+            input.required = false;
+        }
+    }
+
+    function getAmountFromPlan(planStr) {
+        if (!planStr || planStr.includes('包班') || planStr.includes('企業')) return '另議';
+        const match = String(planStr).match(/\$([\d,]+)/);
+        return match ? 'NT$ ' + match[1] : '另議';
+    }
+
+    // ★ 步驟 1: 預覽表單資料
+    function previewForm(e, type) {
+        e.preventDefault();
+        const form = e.target;
+        const formData = new FormData(form);
+        
+        pendingSubmitData = {
+            type: type,
+            name: formData.get('name'),
+            phone: formData.get('phone'),
+            age: formData.get('age'),
+            line: formData.get('line_name'),
+            plan: formData.get('plan'),
+            bank: formData.get('bank_last5'),
+            location: formData.get('location') || '[詳談]',
+            time: formData.get('pref_time'),
+            amount: getAmountFromPlan(formData.get('plan'))
+        };
+
+        const needs = formData.getAll('needs');
+        if (needs.includes('其他')) {
+            const otherVal = type === '器械' ? document.getElementById('eq_other_need').value : document.getElementById('mat_other_need').value;
+            needs[needs.indexOf('其他')] = '其他: ' + otherVal;
+        }
+        pendingSubmitData.needs = needs.join('、');
+
+        document.getElementById('conf-type').innerText = pendingSubmitData.type + '課程';
+        document.getElementById('conf-plan').innerText = pendingSubmitData.plan;
+        document.getElementById('conf-amount').innerText = pendingSubmitData.amount;
+        document.getElementById('conf-loc').innerText = pendingSubmitData.location;
+        document.getElementById('conf-time').innerText = pendingSubmitData.time;
+        document.getElementById('conf-needs').innerText = pendingSubmitData.needs || '無特別需求';
+        document.getElementById('conf-name').innerText = pendingSubmitData.name + ' (' + pendingSubmitData.age + '歲)';
+        document.getElementById('conf-phone').innerText = pendingSubmitData.phone;
+        document.getElementById('conf-line').innerText = pendingSubmitData.line;
+        document.getElementById('conf-bank').innerText = pendingSubmitData.bank;
+
+        navTo('confirm');
+    }
+
+    // ★ 步驟 2: 確認無誤正式送出 (已接通後端 API)
+    function confirmSubmit() {
+        if (!pendingSubmitData) return navTo('main');
+
+        var btn = document.getElementById('btn-final-submit');
+        btn.innerHTML = '<iconify-icon icon="eos-icons:loading" class="mr-2"></iconify-icon> 處理中...';
+        btn.disabled = true;
+
+        if (typeof google === 'undefined') {
+            alert('不在 GAS 環境中，無法提交表單。');
+            btn.innerHTML = '確認無誤，正式送出';
+            btn.disabled = false;
+            return;
+        }
+
+        google.script.run.withSuccessHandler(function(res) {
+            if(res.success) {
+                document.getElementById('sum-type').innerText = pendingSubmitData.type + '課程';
+                document.getElementById('sum-plan').innerText = pendingSubmitData.plan;
+                document.getElementById('sum-amount').innerText = pendingSubmitData.amount;
+                document.getElementById('sum-name').innerText = pendingSubmitData.name;
+                document.getElementById('sum-phone').innerText = pendingSubmitData.phone;
+                document.getElementById('sum-line').innerText = pendingSubmitData.line;
+                document.getElementById('sum-bank').innerText = pendingSubmitData.bank;
+                
+                btn.innerHTML = '確認無誤，正式送出';
+                btn.disabled = false;
+                
+                navTo('summary');
+            } else {
+                alert('報名失敗：' + res.msg);
+                btn.innerHTML = '確認無誤，正式送出';
+                btn.disabled = false;
+            }
+        }).withFailureHandler(function(err) {
+            alert('系統連線錯誤：' + err);
+            btn.innerHTML = '確認無誤，正式送出';
+            btn.disabled = false;
+        }).submitSignup(pendingSubmitData);
+    }
+
+    // ==========================================
+    // ★ 新增：動態載入時段選項功能
+    // ==========================================
+    // ★ 新增：動態載入時段選項功能 (支援專屬營業時間)
+    // ==========================================
+    function loadTimeSlots() {
+        if (typeof google !== 'undefined' && google.script) {
+            google.script.run.withSuccessHandler(function(res) {
+                if (res && res.success && res.useAutoFilter) {
+                    populateTimeDropdowns(res.schedules, res.businessHours || {});
+                } else {
+                    fallbackToManualTime();
+                }
+            }).withFailureHandler(function() {
+                fallbackToManualTime();
+            }).getFeePageConfig();
+        } else {
+            fallbackToManualTime();
+        }
+    }
+
+    function fallbackToManualTime() {
+        ['eq', 'mat'].forEach(type => {
+            const hint = document.getElementById('time-hint_' + type);
+            const input = document.getElementById('pref_time_input_' + type);
+            const select = document.getElementById('pref_time_select_' + type);
+            if(hint) hint.innerText = '(後續將由專人協調確認)';
+            if(input) { input.disabled = false; input.classList.remove('hidden'); input.required = true; }
+            if(select) { select.disabled = true; select.classList.add('hidden'); select.required = false; }
+        });
+    }
+
+    function populateTimeDropdowns(schedules, businessHours) {
+        const days = ['週日', '週一', '週二', '週三', '週四', '週五', '週六'];
+        let html = '<option value="">請選擇時段...</option>';
+        
+        for (let d = 1; d <= 7; d++) {
+            let dayIdx = d === 7 ? 0 : d; // 調整為 1-6(一~六) 加上 0(日)
+
+            // ★ 修改：如果該天沒有在設定表內(沒有營業時間)，顯示 [公休]
+            if (!businessHours[dayIdx]) {
+                html += `<optgroup label="${days[dayIdx]} [公休]" class="bg-dark text-white/40"></optgroup>`;
+                continue;
+            }
+
+            let startH = businessHours[dayIdx].start;
+            let endH = businessHours[dayIdx].end;
+            let hasAvailableSlot = false;
+            let optionsHtml = '';
+
+            for (let h = startH; h <= endH; h++) {
+                for (let m of [0, 30]) {
+                    // 假設營業到 21:00，就不顯示 21:30 的選項
+                    if (h === endH && m > 0) continue;
+
+                    let slotMins = h * 60 + m;
+                    
+                    // 檢查是否在此星期重疊到任一課程 (+- 90 分鐘緩衝)
+                    let isExcluded = schedules.some(s => {
+                        if (s.day !== dayIdx) return false;
+                        if (!s.time) return false;
+                        let timeParts = s.time.split(':');
+                        let sStart = parseInt(timeParts[0]) * 60 + parseInt(timeParts[1]);
+                        let sEnd = sStart + parseInt(s.duration || 60);
+                        return (slotMins >= sStart - 90 && slotMins <= sEnd + 90);
+                    });
+                    
+                    if (!isExcluded) {
+                        let timeStr = String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
+                        optionsHtml += `<option value="${days[dayIdx]} ${timeStr}" class="bg-dark text-sand">${days[dayIdx]} ${timeStr}</option>`;
+                        hasAvailableSlot = true;
+                    }
+                }
+            }
+            
+            // ★ 修改：判斷該天是否還有剩餘空檔
+            if (!hasAvailableSlot) {
+                html += `<optgroup label="${days[dayIdx]} [額滿]" class="bg-dark text-white/40"></optgroup>`;
+            } else {
+                html += `<optgroup label="${days[dayIdx]}" class="bg-dark text-gold">${optionsHtml}</optgroup>`;
+            }
+        }
+
+        ['eq', 'mat'].forEach(type => {
+            const hint = document.getElementById('time-hint_' + type);
+            const input = document.getElementById('pref_time_input_' + type);
+            const select = document.getElementById('pref_time_select_' + type);
+            if(hint) hint.innerText = '(僅顯示可預約空檔)';
+            if(input) { input.disabled = true; input.classList.add('hidden'); input.required = false; }
+            if(select) { 
+                select.innerHTML = html; 
+                select.disabled = false; 
+                select.classList.remove('hidden'); 
+                select.required = true; 
+            }
+        });
+    }
+
+    // 頁面載入後自動向後端拉取時段設定
+    window.addEventListener('load', loadTimeSlots);
+  </script>
+</body>
+</html>
