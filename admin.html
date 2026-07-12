@@ -29,6 +29,7 @@
     
     .btn-group { display: flex; gap: 6px; flex-direction: column; }
     .btn-detail { background-color: var(--primary); color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; }
+    .btn-edit-profile { background-color: var(--warning-color); color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; }
     .btn-delete { background-color: var(--deduct-color); color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; }
     
     .student-avatar { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 1px solid var(--secondary); background: #EEE; }
@@ -62,9 +63,12 @@
     .modal-sheet { background: var(--white); width: 100%; max-height: 85%; border-top-left-radius: 20px; border-top-right-radius: 20px; padding: 20px; overflow-y: auto; box-shadow: 0 -4px 20px rgba(0,0,0,0.1); }
     .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--secondary); padding-bottom: 10px; margin-bottom: 14px; }
     .btn-close-modal { background: var(--secondary); border: none; padding: 6px 14px; border-radius: 8px; color: var(--text-dark); font-weight: bold; cursor: pointer; }
-    .log-timeline-item { background: var(--bg-color); padding: 10px; border-radius: 8px; margin-bottom: 8px; font-size: 13.5px; }
+    
+    /* 摺疊歷史紀錄設計 */
+    .log-group { margin-bottom: 8px; width: 100%; }
+    .log-timeline-item { position: relative; background: var(--bg-color); padding: 12px; border-radius: 8px; margin-bottom: 8px; font-size: 13.5px; }
+    .btn-delete-log { position: absolute; top: 8px; right: 8px; background: transparent; border: none; color: var(--deduct-color); font-size: 16px; cursor: pointer; padding: 4px; }
 
-    /* 高質感自訂提示彈窗 */
     #custom-popup-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(74, 63, 57, 0.4); z-index: 20000; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(3px); }
     .custom-popup-box { background: var(--white); width: 85%; max-width: 360px; border-radius: 20px; padding: 24px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
   </style>
@@ -133,7 +137,7 @@
       <div id="expiry-warning" class="warning-text">⚠️ 警告：設定的到期日低於 30 天，請確認是否正確！</div>
       
       <div class="form-group">
-        <label>內部課堂備註 <span style="color:#888; font-weight:normal;">(會顯示給學員，非必填)</span></label>
+        <label>內部課堂備註 <span style="color:#888; font-weight:normal;">(僅供內部紀錄，非必填)</span></label>
         <input type="text" id="class-note" placeholder="例：下肢核心訓練、儲值20堂團課">
       </div>
       
@@ -158,6 +162,20 @@
     </div>
   </div>
 
+  <div id="edit-profile-modal" class="modal-overlay hidden">
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <h3 style="margin:0; font-weight:bold;">修改學員基本資料</h3>
+        <button class="btn-close-modal" onclick="closeEditModal()">取消</button>
+      </div>
+      <input type="hidden" id="edit-student-uid">
+      <div class="form-group"><label>真實姓名</label><input type="text" id="edit-student-name"></div>
+      <div class="form-group"><label>生日</label><input type="date" id="edit-student-birthday"></div>
+      <div class="form-group"><label>手機號碼</label><input type="tel" id="edit-student-phone"></div>
+      <button class="btn-submit bg-add" onclick="submitProfileEdit()" style="margin-top:10px;">儲存修改項目</button>
+    </div>
+  </div>
+
   <script>
     // ==========================================
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwjVzYLsjAWSfIaB6lT68GZBF4w-Facr_QrPOCwk0cUVPDvqPvwaeiexi9p05kurnfD/exec";
@@ -166,71 +184,9 @@
     let allStudents = [];
     let currentMode = "扣點"; 
 
-    // --- 高質感自訂彈窗功能區 ---
-    function customAlert(message, icon = "🔔", title = "系統提示") {
-      return new Promise((resolve) => {
-        document.getElementById('custom-popup-icon').innerText = icon;
-        document.getElementById('custom-popup-title').innerText = title;
-        document.getElementById('custom-popup-message').innerText = message;
-        document.getElementById('custom-popup-cancel').style.display = "none";
-        document.getElementById('custom-popup-input').classList.add('hidden');
-        
-        const confirmBtn = document.getElementById('custom-popup-confirm');
-        confirmBtn.className = "btn-submit bg-add"; confirmBtn.innerText = "確定";
-        document.getElementById('custom-popup-overlay').classList.remove('hidden');
-        
-        confirmBtn.onclick = () => { document.getElementById('custom-popup-overlay').classList.add('hidden'); resolve(true); };
-      });
-    }
-
-    function customConfirm(message, icon = "⚠️", title = "安全防呆確認", isDanger = false) {
-      return new Promise((resolve) => {
-        document.getElementById('custom-popup-icon').innerText = icon;
-        document.getElementById('custom-popup-title').innerText = title;
-        document.getElementById('custom-popup-message').innerText = message;
-        document.getElementById('custom-popup-input').classList.add('hidden');
-        
-        const cancelBtn = document.getElementById('custom-popup-cancel');
-        cancelBtn.style.display = "block"; cancelBtn.innerText = "取消";
-        
-        const confirmBtn = document.getElementById('custom-popup-confirm');
-        confirmBtn.className = "btn-submit " + (isDanger ? "bg-deduct" : "bg-add");
-        confirmBtn.innerText = "確定";
-
-        document.getElementById('custom-popup-overlay').classList.remove('hidden');
-
-        cancelBtn.onclick = () => { document.getElementById('custom-popup-overlay').classList.add('hidden'); resolve(false); };
-        confirmBtn.onclick = () => { document.getElementById('custom-popup-overlay').classList.add('hidden'); resolve(true); };
-      });
-    }
-
-    function customPrompt(message, title = "請輸入密碼") {
-      return new Promise((resolve) => {
-        document.getElementById('custom-popup-icon').innerText = "🔒";
-        document.getElementById('custom-popup-title').innerText = title;
-        document.getElementById('custom-popup-message').innerText = message;
-        
-        const input = document.getElementById('custom-popup-input');
-        input.classList.remove('hidden'); input.value = "";
-        
-        const cancelBtn = document.getElementById('custom-popup-cancel');
-        cancelBtn.style.display = "block"; cancelBtn.innerText = "取消";
-        
-        const confirmBtn = document.getElementById('custom-popup-confirm');
-        confirmBtn.className = "btn-submit bg-deduct"; confirmBtn.innerText = "確認";
-
-        document.getElementById('custom-popup-overlay').classList.remove('hidden');
-
-        cancelBtn.onclick = () => { document.getElementById('custom-popup-overlay').classList.add('hidden'); input.classList.add('hidden'); resolve(null); };
-        confirmBtn.onclick = () => { document.getElementById('custom-popup-overlay').classList.add('hidden'); input.classList.add('hidden'); resolve(input.value); };
-      });
-    }
-
-    // 日期淨化器：移除 T 與 Z，強制轉為漂亮格式
     function cleanDateString(dateStr) {
       if (!dateStr || dateStr === "-" || dateStr === "尚未設定" || dateStr === "無紀錄") return dateStr || "";
-      const d = new Date(dateStr);
-      if (isNaN(d.getTime())) return dateStr.replace('T', ' ').replace(/\.\d+Z$/, '').replace('Z', ''); // 備用方案
+      const d = new Date(dateStr); if (isNaN(d.getTime())) return dateStr.replace('T', ' ').replace(/\.\d+Z$/, '').replace('Z', ''); 
       const yyyy = d.getFullYear(), mm = String(d.getMonth() + 1).padStart(2, '0'), dd = String(d.getDate()).padStart(2, '0');
       const hh = String(d.getHours()).padStart(2, '0'), min = String(d.getMinutes()).padStart(2, '0'), ss = String(d.getSeconds()).padStart(2, '0');
       return (hh==='00' && min==='00' && ss==='00') ? `${yyyy}-${mm}-${dd}` : `${yyyy}-${mm}-${dd} ${hh}:${min}:${ss}`;
@@ -240,8 +196,7 @@
       if (!birthdayStr) return "?";
       const birthDate = new Date(birthdayStr); if(isNaN(birthDate.getTime())) return "?";
       const today = new Date(); let age = today.getFullYear() - birthDate.getFullYear();
-      const m = today.getMonth() - birthDate.getMonth();
-      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
+      const m = today.getMonth() - birthDate.getMonth(); if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
       return age;
     }
 
@@ -256,9 +211,7 @@
         localStorage.setItem('soma_admin_authed', 'true');
         document.getElementById('auth-overlay').classList.add('hidden');
         fetchStudents();
-      } else {
-        await customAlert("密碼不正確喔！請重新輸入。", "❌", "錯誤");
-      }
+      } else { await customAlert("密碼不正確喔！請重新輸入。", "❌", "錯誤"); }
     }
 
     async function fetchStudents() {
@@ -270,8 +223,7 @@
     }
 
     function renderStudents(list) {
-      const container = document.getElementById('student-list');
-      container.innerHTML = "";
+      const container = document.getElementById('student-list'); container.innerHTML = "";
       if(list.length === 0) { container.innerHTML = "<p style='text-align:center; color:#888; padding:10px;'>無相符學員資料</p>"; return; }
       list.forEach(student => {
         const avatarUrl = student.avatar || "https://img.icons8.com/illustrations/xlarge/downloading-updates.png";
@@ -292,11 +244,47 @@
           </div>
           <div class="btn-group">
             <button class="btn-detail" onclick="openDetailsModal('${student.uid}')">📄 明細</button>
+            <button class="btn-edit-profile" onclick="openEditModal('${student.uid}')">✏️ 編輯</button>
             <button class="btn-delete" onclick="deleteStudent('${student.uid}', '${student.name}')">刪除</button>
           </div>
         `;
         container.appendChild(item);
       });
+    }
+
+    // ✨ 新增：彈出並填充修改個人資料功能
+    function openEditModal(uid) {
+      const student = allStudents.find(s => s.uid === uid);
+      if (!student) return;
+      document.getElementById('edit-student-uid').value = student.uid;
+      document.getElementById('edit-student-name').value = student.name;
+      document.getElementById('edit-student-birthday').value = student.birthday ? student.birthday.split(' ')[0] : "";
+      document.getElementById('edit-student-phone').value = student.phone;
+      document.getElementById('edit-profile-modal').classList.remove('hidden');
+    }
+    function closeEditModal() { document.getElementById('edit-profile-modal').classList.add('hidden'); }
+
+    async function submitProfileEdit() {
+      const uid = document.getElementById('edit-student-uid').value;
+      const name = document.getElementById('edit-student-name').value.trim();
+      const birthday = document.getElementById('edit-student-birthday').value;
+      const phone = document.getElementById('edit-student-phone').value.trim();
+
+      if (!name || !birthday || !phone) { await customAlert("所有修改欄位都要填寫喔！", "❌"); return; }
+      
+      closeEditModal();
+      document.getElementById('loading-msg').innerText = "🚀 正在更新資料庫..."; document.getElementById('loading-msg').classList.remove('hidden');
+      
+      try {
+        const response = await fetch(GAS_API_URL, {
+          method: "POST",
+          body: JSON.stringify({ action: "updateStudentProfile", uid: uid, name: name, birthday: birthday, phone: phone })
+        });
+        const result = await response.json();
+        document.getElementById('loading-msg').classList.add('hidden');
+        if (result.success) { await customAlert("學員基本資料修改成功！", "✅"); fetchStudents(); }
+        else { await customAlert("修改失敗：" + result.message, "❌"); }
+      } catch (e) { document.getElementById('loading-msg').classList.add('hidden'); await customAlert("連線錯誤。", "❌"); }
     }
 
     function filterStudents() {
@@ -319,8 +307,6 @@
         btnDeduct.className = "mode-btn"; btnAdd.className = "mode-btn active-add";
         submitBtn.className = "btn-submit bg-add"; submitBtn.innerText = "確認送出加點儲值";
         pointsLabel.innerText = "增加儲值點數"; expiryGroup.classList.remove('hidden');
-        
-        // 預設到期日為今日 + 100 天
         const defaultExpiry = new Date(); defaultExpiry.setDate(defaultExpiry.getDate() + 100);
         document.getElementById('expiry-date').valueAsDate = defaultExpiry;
       }
@@ -360,19 +346,38 @@
             const groupedLogs = {};
             result.logs.forEach(log => {
               const cleanTime = cleanDateString(log.timestamp);
-              const datePart = cleanTime.split(' ')[0] || cleanTime;
-              const timePart = cleanTime.split(' ')[1] || '';
+              const datePart = cleanTime.split(' ')[0] || cleanTime; const timePart = cleanTime.split(' ')[1] || '';
               if (!groupedLogs[datePart]) groupedLogs[datePart] = [];
               groupedLogs[datePart].push({ ...log, timePart });
             });
 
+            // ✨ 修改：後台明細日期同步支援可收合抽屜並顯示筆數
             for (const dateKey in groupedLogs) {
-              logContainer.innerHTML += `<div style="background:var(--secondary); color:var(--text-dark); padding:4px 10px; border-radius:6px; font-weight:bold; font-size:13px; margin:14px 0 8px 0;">📅 ${dateKey}</div>`;
-              groupedLogs[dateKey].forEach(log => {
+              const items = groupedLogs[dateKey];
+              let groupHtml = `
+                <details class="log-group" open>
+                  <summary style="background:var(--secondary); padding:8px 12px; border-radius:6px; font-weight:bold; font-size:13px; margin:10px 0 6px 0; cursor:pointer; display:flex; justify-content:space-between; align-items:center; user-select:none;">
+                    <span>📅 ${dateKey}</span>
+                    <span style="font-size:12px; color:#666; font-weight:normal;">共 ${items.length} 筆 ▾</span>
+                  </summary>
+                  <div style="padding-top:4px;">
+              `;
+              
+              items.forEach(log => {
                 let sign = log.pointsChange > 0 ? "+" : ""; let color = log.pointsChange > 0 ? "var(--add-color)" : "var(--deduct-color)";
-                let itemHtml = `<div class="log-timeline-item"><div style="display:flex; justify-content:space-between; font-size:11px; color:#888; margin-bottom:4px;"><span>⏳ 時間：${log.timePart || dateKey}</span><span style="color:${color}; font-weight:bold; margin-left:auto;">${sign}${log.pointsChange} 點</span></div><strong>項目：</strong>${log.courseType}點數 (${log.note || "無備註"})<br>${log.teacherMessage ? `<span style="color:#665; font-style:italic;">💬 給學生的話：${log.teacherMessage}</span>` : ""}</div>`;
-                logContainer.innerHTML += itemHtml;
+                groupHtml += `
+                <div class="log-timeline-item">
+                  <button class="btn-delete-log" onclick="deleteLogEntry(${log.rowIndex}, '${uid}')">🗑️</button>
+                  <div style="display:flex; justify-content:space-between; font-size:11px; color:#888; margin-bottom:4px; padding-right: 20px;">
+                    <span>⏳ 時間：${log.timePart || dateKey}</span>
+                    <span style="color:${color}; font-weight:bold; margin-left:auto;">${sign}${log.pointsChange} 點</span>
+                  </div>
+                  <strong>項目：</strong>${log.courseType}點數 (${log.note || "無備註"})<br>
+                  ${log.teacherMessage ? `<span style="color:#665; font-style:italic;">💬 給學生的話：${log.teacherMessage}</span>` : ""}
+                </div>`;
               });
+              groupHtml += `</div></details>`;
+              logContainer.innerHTML += groupHtml;
             }
           }
           document.getElementById('details-modal').classList.remove('hidden');
@@ -396,17 +401,33 @@
       const teacherMessage = document.getElementById('teacher-message').value;
       const expiryDate = document.getElementById('expiry-date').value;
 
-      if (currentMode === "加點" && expiryDate) {
-        const diffDays = Math.ceil((new Date(expiryDate + "T00:00:00") - new Date().setHours(0,0,0,0)) / (1000 * 60 * 60 * 24));
-        if (diffDays < 30) {
-          if (!(await customConfirm(`設定效期僅剩 ${diffDays} 天。\n請問確定維持這個極短時間嗎？`, "⚠️", "重要二次防呆", true))) return; 
+      // ✨ 新增：0點儲值效期延展防呆檢查
+      if (currentMode === "加點") {
+        if (rawPoints === 0) {
+          let isExtension = false;
+          selectedStudents.forEach(s => {
+            const match = allStudents.find(item => item.uid === s.uid);
+            if (match && expiryDate) {
+              const currentExp = match.expiryDate ? match.expiryDate.split(' ')[0] : "";
+              if (!currentExp || expiryDate > currentExp) isExtension = true;
+            }
+          });
+          
+          if (isExtension) {
+            const checkExt = await customConfirm(`⚠️ 【點數效期延展提示】\n偵測到儲值為 0 點且新到期日大於原本到期日。\n此操作將以『日期延展』模式送出，確定要延展並發送通知給學生嗎？`, "📅", "效期延展審查");
+            if (!checkExt) return;
+          }
+        } else if (expiryDate) {
+          const diffDays = Math.ceil((new Date(expiryDate + "T00:00:00") - new Date().setHours(0,0,0,0)) / (1000 * 60 * 60 * 24));
+          if (diffDays < 30) {
+            if (!(await customConfirm(`設定效期僅剩 ${diffDays} 天。\n請問確定維持這個極短時間嗎？`, "⚠️", "重要二次防呆", true))) return; 
+          }
         }
       }
 
       const confirmMsg = `模式：${currentMode}\n項目：${pointType}\n異動：${pointsChange} 點\n備註：${classNote || "無"}\n影響人數：${selectedStudents.length} 位\n\n確定寫入並發送 LINE 推播嗎？`;
       if (!(await customConfirm(confirmMsg, "💬", "最後確認"))) return;
 
-      // 按鍵鎖定機制
       const submitBtn = document.getElementById('submit-btn');
       submitBtn.disabled = true; submitBtn.innerText = "🚀 系統處理中...";
       
@@ -419,41 +440,42 @@
           const res = await sendVerificationRequest(pointType, pointsChange, selectedStudents, classNote, teacherMessage, expiryDate);
           handleFinalResults([res]);
         }
-      } catch (err) { 
-        await customAlert("資料庫中斷，請確認連線。", "📶"); 
-      } finally {
-        // 解除按鍵鎖定
-        submitBtn.disabled = false; submitBtn.innerText = currentMode === "扣點" ? "確認送出核銷" : "確認送出加點儲值";
-      }
+      } catch (err) { await customAlert("資料庫中斷，請確認連線。", "📶"); } 
+      finally { submitBtn.disabled = false; submitBtn.innerText = currentMode === "扣點" ? "確認送出核銷" : "確認送出加點儲值"; }
     }
 
     async function sendVerificationRequest(type, change, students, note, msg, expiry) {
-      const postData = { action: "processClassVerification", students: students, courseType: type, pointsChange: change, note: note, teacherMessage: msg, expiryDate: currentMode === "加點" ? expiry : "" };
+      // 附加傳入 mode: currentMode 幫助後端精準判讀 0 點推播模板
+      const postData = { action: "processClassVerification", students: students, courseType: type, pointsChange: change, note: note, teacherMessage: msg, expiryDate: currentMode === "加點" ? expiry : "", mode: currentMode };
       const response = await fetch(GAS_API_URL, { method: "POST", body: JSON.stringify(postData) });
       return await response.json();
     }
 
     async function handleFinalResults(resultsArray) {
-  let summaryText = "";
-  resultsArray.forEach(res => { 
-    if(res.results) {
-      res.results.forEach(r => {
-        // 這裡會把 GAS 捕捉到的 LINE 錯誤直接印出來
-        summaryText += `${r.name}: ${r.success ? "✅ " + r.message : "❌ 失敗 (" + r.message + ")"}\n\n`; 
-      });
+      let summaryText = "";
+      resultsArray.forEach(res => { if(res.results) res.results.forEach(r => summaryText += `${r.name}: ${r.success ? "✅ " + r.message : "❌ 失敗"}\n\n`); });
+      await customAlert(summaryText, "🎉", "執行完畢報告");
+      document.getElementById('class-note').value = ""; document.getElementById('teacher-message').value = ""; document.getElementById('points-change').value = "1";
+      fetchStudents();
     }
-  });
-  await customAlert(summaryText, "🎉", "執行完畢報告");
-  
-  document.getElementById('class-note').value = ""; document.getElementById('teacher-message').value = ""; document.getElementById('points-change').value = "1";
-  fetchStudents();
-}
+
+    async function deleteLogEntry(rowIndex, uid) {
+      const pwd = await customPrompt(`為防止誤刪，請輸入系統密碼以刪除此紀錄：`, "🔒 安全鎖定");
+      if (pwd === null) return; if (pwd !== "1018") { await customAlert("密碼錯誤，取消刪除！", "❌"); return; }
+      if(!(await customConfirm(`確定要刪除這筆明細紀錄嗎？`, "🗑️", "刪除明細紀錄", true))) return;
+      
+      document.getElementById('loading-msg').innerText = "🚀 正在刪除明細..."; document.getElementById('loading-msg').classList.remove('hidden');
+      try {
+        const res = await fetch(GAS_API_URL, { method: 'POST', body: JSON.stringify({ action: "deleteLogEntry", rowIndex: rowIndex }) });
+        const result = await res.json();
+        if(result.success) { await customAlert("明細已成功刪除。", "✅"); openDetailsModal(uid); } 
+        else { await customAlert("刪除失敗：" + result.message, "❌"); }
+      } catch (e) { await customAlert("網路連線錯誤。", "❌"); document.getElementById('loading-msg').classList.add('hidden');}
+    }
 
     async function deleteStudent(uid, name) {
       const pwd = await customPrompt(`為防止誤刪，請輸入系統密碼以刪除【${name}】：`, "🔒 安全鎖定");
-      if (pwd === null) return; // 按了取消
-      if (pwd !== "1018") { await customAlert("密碼錯誤，取消刪除！", "❌"); return; }
-      
+      if (pwd === null) return; if (pwd !== "1018") { await customAlert("密碼錯誤，取消刪除！", "❌"); return; }
       if(!(await customConfirm(`確定要將學員【${name}】徹底刪除嗎？`, "🗑️", "不可逆操作警告", true))) return;
       
       try {
