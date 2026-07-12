@@ -636,20 +636,49 @@
         navTo('confirm');
     }
 
-    // ★ 步驟 2: 確認無誤正式送出 (已接通後端 API)
-    function confirmSubmit() {
+    // ★ 步驟 2: 確認無誤正式送出 (使用 fetch 呼叫 GAS API)
+    async function confirmSubmit() {
         if (!pendingSubmitData) return navTo('main');
 
         var btn = document.getElementById('btn-final-submit');
         btn.innerHTML = '<iconify-icon icon="eos-icons:loading" class="mr-2"></iconify-icon> 處理中...';
         btn.disabled = true;
 
-        if (typeof google === 'undefined') {
-            alert('不在 GAS 環境中，無法提交表單。');
+        // 加入 action 參數，讓後端知道這是「報名表單送出」的要求
+        pendingSubmitData.action = "submitSignup";
+
+        try {
+            // 使用標準的 fetch 發送資料給您的 GAS API
+            const response = await fetch(GAS_API_URL, {
+                method: "POST",
+                body: JSON.stringify(pendingSubmitData)
+            });
+            const res = await response.json();
+
+            if(res.success) {
+                document.getElementById('sum-type').innerText = pendingSubmitData.type + '課程';
+                document.getElementById('sum-plan').innerText = pendingSubmitData.plan;
+                document.getElementById('sum-amount').innerText = pendingSubmitData.amount;
+                document.getElementById('sum-name').innerText = pendingSubmitData.name;
+                document.getElementById('sum-phone').innerText = pendingSubmitData.phone;
+                document.getElementById('sum-line').innerText = pendingSubmitData.line;
+                document.getElementById('sum-bank').innerText = pendingSubmitData.bank;
+                
+                btn.innerHTML = '確認無誤，正式送出';
+                btn.disabled = false;
+                
+                navTo('summary');
+            } else {
+                alert('報名失敗：' + res.msg);
+                btn.innerHTML = '確認無誤，正式送出';
+                btn.disabled = false;
+            }
+        } catch (err) {
+            alert('系統連線錯誤，請確認網路或 API 網址：' + err);
             btn.innerHTML = '確認無誤，正式送出';
             btn.disabled = false;
-            return;
         }
+    }
 
         google.script.run.withSuccessHandler(function(res) {
             if(res.success) {
